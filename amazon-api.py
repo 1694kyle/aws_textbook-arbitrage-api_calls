@@ -49,6 +49,7 @@ def get_price_data(item_frame):
                         # item_frame.drop(item_frame.loc[item_frame['asin'] == asin])
                         continue
                     else:
+                        print 'Profit Found\n\tASIN - {}\n\tPrice - {}\n\tProfit{}\n\tROI - {}'.format(asin, price, profit, roi)
                         item_frame.loc[item_frame['asin'] == asin, 'trade_in_eligible'] = trade_in_eligible
                         item_frame.loc[item_frame['asin'] == asin, 'trade_value'] = trade_value
                         item_frame.loc[item_frame['asin'] == asin, 'price'] = price
