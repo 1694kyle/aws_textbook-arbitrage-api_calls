@@ -37,10 +37,23 @@ def get_price_data(item_frame):
             asin = item.ASIN
             if hasattr(item.ItemAttributes, 'IsEligibleForTradeIn'):
                 trade_in_eligible = bool(item.ItemAttributes.IsEligibleForTradeIn)
+
                 if trade_in_eligible:
-                    trade_value = item.ItemAttributes.TradeInValue.Amount / 100.0
-                    lowest_used_price = item.OfferSummary.LowestUsedPrice.Amount / 100.0
-                    lowest_new_price = item.OfferSummary.LowestNewPrice.Amount / 100.0
+                    if hasattr(item.ItemAttributes, 'TradeInValue'):
+                        trade_value = item.ItemAttributes.TradeInValue.Amount / 100.0
+                    else:
+                        trade_value = 0
+
+                    if hasattr(item.ItemAttributes, 'LowestUsedPrice'):
+                        lowest_used_price = item.OfferSummary.LowestUsedPrice.Amount / 100.0
+                    else:
+                        lowest_used_price = 999
+
+                    if hasattr(item.ItemAttributes, 'LowestNewPrice'):
+                        lowest_new_price = item.OfferSummary.LowestNewPrice.Amount / 100.0
+                    else:
+                        lowest_new_price = 999
+
                     price = min(lowest_used_price, lowest_new_price)
                     profit = (trade_value - price) - 3.99
                     roi = round(float(profit / price * 100), 2)
