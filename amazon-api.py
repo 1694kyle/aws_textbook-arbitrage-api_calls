@@ -7,6 +7,12 @@ import re
 import pandas as pd
 import numpy as np
 import time
+import os
+from email.mime.application import MIMEApplication
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+import smtplib
+
 
 
 def item_keys(keys):
@@ -15,11 +21,15 @@ def item_keys(keys):
 
 
 def upload_results(frame):
+    global search_date
     if len(frame) == 0:
         return None
     k = Key(bucket)
-    k.key = '/api_results/results-{}'.format(latest_items_key.name[latest_items_key.name.index('items-') + len('items-'):])
+    search_date = latest_items_key.name[latest_items_key.name.index('items-') + len('items-'):]
+    k.key = '/api_results/results-{}'.format(search_date)
     k.set_contents_from_string(frame.to_csv())
+    send_mail_via_smtp()
+    os.remove('results.csv')
 
 
 def get_item_frame():
@@ -30,6 +40,7 @@ def get_item_frame():
 
 
 def get_price_data(item_frame):
+    global search_date
     for chunk in _chunker(item_frame, 10):
         asins = [row['asin'] for i, row in chunk.iterrows()]
         response = amzn_search(asins)
@@ -55,14 +66,14 @@ def get_price_data(item_frame):
                         lowest_new_price = 999
 
                     price = min(lowest_used_price, lowest_new_price)
-                    profit = (trade_value - price) - 3.99
+                    profit = 30 #(trade_value - price) - 3.99
                     roi = round(float(profit / price * 100), 2)
 
                     if not profit > 10:
                         # item_frame.drop(item_frame.loc[item_frame['asin'] == asin])
                         continue
                     else:
-                        print 'Profit Found\n\tASIN - {}\n\tPrice - {}\n\tProfit{}\n\tROI - {}'.format(asin, price, profit, roi)
+                        print 'Profit Found\n\tASIN - {}\n\tPrice - {}\n\tProfit - {}\n\tROI - {}'.format(asin, price, profit, roi)
                         item_frame.loc[item_frame['asin'] == asin, 'trade_in_eligible'] = trade_in_eligible
                         item_frame.loc[item_frame['asin'] == asin, 'trade_value'] = trade_value
                         item_frame.loc[item_frame['asin'] == asin, 'price'] = price
@@ -74,7 +85,10 @@ def get_price_data(item_frame):
             else:
                 # item_frame.drop(item_frame.loc[item_frame['asin'] == asin])
                 continue
-    return item_frame.dropna()
+
+    result_frame = item_frame.dropna()
+    result_frame.to_csv('results.csv'.format(search_date))
+    return result_frame
 
 
 def amzn_search(asins):
@@ -107,16 +121,54 @@ def _chunker(seq, size):
     return (seq[pos:pos + size] for pos in xrange(0, len(seq), size))
 
 
+def send_mail_via_smtp():
+    global search_date
+    username = os.environ['YAHOO_USERNAME'] + '@yahoo.com'
+    password = os.environ['YAHOO_PASSWORD']
+
+    recipients_emails = 'kylebonnet@gmail.com'
+
+    body = 'GET SOME'
+
+    msg = MIMEMultipart(
+        From=username,
+        To=recipients_emails,
+        Subject='Textbook Arbitrage Results - {}'.format(search_date)
+    )
+
+    msg.attach(MIMEText(body))
+
+    msg.attach(MIMEApplication(
+        open('results.csv'.format(search_date)).read(),
+        Content_Disposition='attachment; filename=results - {}'.format(search_date),
+        Name='results - {}'.format(search_date)
+    ))
+
+    try:
+        smtpserver = smtplib.SMTP("smtp.mail.yahoo.com", 587)
+        smtpserver.ehlo()
+        smtpserver.starttls()
+        smtpserver.ehlo()
+        smtpserver.login(username, password)
+        fromaddr = username
+        smtpserver.sendmail(fromaddr, recipients_emails, msg.as_string())
+        print '{0} EMAIL SENT {0}'.format('*' * 10)
+    except Exception as e:
+        print "failed to send mail"
+        print e
+
+
 if __name__ == '__main__':
     conn = boto.connect_s3()
     bucket = conn.get_bucket('textbook-arbitrage')
     api_cols = ['trade_in_eligible', 'trade_value', 'price', 'profit', 'roi']
-
+    search_date = ''
     keys = bucket.list()
     latest_items_key = item_keys(keys)[0]
 
     frame = get_item_frame()
     price_frame = get_price_data(frame)
     upload_results(price_frame)
+
 
     print 'finished'
