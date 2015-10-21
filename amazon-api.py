@@ -55,12 +55,12 @@ def get_price_data(item_frame):
                     else:
                         trade_value = 0
 
-                    if hasattr(item.ItemAttributes, 'LowestUsedPrice'):
+                    if hasattr(item.OfferSummary, 'LowestUsedPrice'):
                         lowest_used_price = item.OfferSummary.LowestUsedPrice.Amount / 100.0
                     else:
                         lowest_used_price = 999
 
-                    if hasattr(item.ItemAttributes, 'LowestNewPrice'):
+                    if hasattr(item.OfferSummary, 'LowestNewPrice'):
                         lowest_new_price = item.OfferSummary.LowestNewPrice.Amount / 100.0
                     else:
                         lowest_new_price = 999
