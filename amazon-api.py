@@ -66,7 +66,7 @@ def get_price_data(item_frame):
                         lowest_new_price = 999
 
                     price = min(lowest_used_price, lowest_new_price)
-                    profit = 30 #(trade_value - price) - 3.99
+                    profit = (trade_value - price) - 3.99
                     roi = round(float(profit / price * 100), 2)
 
                     if not profit > 10:
