@@ -37,7 +37,7 @@ def get_item_frame():
     frame = pd.DataFrame.from_csv(latest_items_key)
     for col in api_cols:
         frame[col] = np.nan
-    return frame
+    return frame.reset_index()
 
 
 def get_price_data(item_frame):
@@ -118,7 +118,10 @@ def _get_amzn_response(asins, api):
         except AWSError, e:
             err_count += 1
             print 'AWS Error: {}'.format(e.code)
-            if err_count > 5:
+            if e[1] in asins:
+                asins.remove(e[1])
+                print '\t{} Dropped - Not ASIN'.format(e[1])
+            if err_count > 10:
                 return None
             time.sleep(2)
             continue
@@ -168,7 +171,7 @@ def send_mail_via_smtp():
 if __name__ == '__main__':
     conn = boto.connect_s3()
     bucket = conn.get_bucket('textbook-arbitrage')
-    api_cols = ['trade_in_eligible', 'trade_value', 'price', 'profit', 'roi']
+    api_cols = ['trade_in_eligible', 'trade_value', 'price', 'profit', 'roi', 'url']
     search_date = ''
     keys = bucket.list()
     latest_items_key = item_keys(keys)
