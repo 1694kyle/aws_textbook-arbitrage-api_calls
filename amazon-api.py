@@ -48,7 +48,10 @@ def get_price_data(item_frame):
             response = amzn_search(isbn10s)
         except:
             continue
+
         for item in response.Items.Item:
+            if item is None:
+                continue
             item_count += 1
             asin = item.ASIN
             if hasattr(item.ItemAttributes, 'IsEligibleForTradeIn'):
