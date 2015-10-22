@@ -171,7 +171,7 @@ if __name__ == '__main__':
     api_cols = ['trade_in_eligible', 'trade_value', 'price', 'profit', 'roi']
     search_date = ''
     keys = bucket.list()
-    latest_items_key = item_keys(keys)[0]
+    latest_items_key = item_keys(keys)
 
     frame = get_item_frame()
     price_frame = get_price_data(frame)
