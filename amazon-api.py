@@ -12,12 +12,13 @@ from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import smtplib
-
-
+from operator import itemgetter
 
 def item_keys(keys):
     regex = re.compile(r'scraping_items\/items-(.+)\.csv')
-    return [key for key in keys if re.match(regex, key.name)] # and key.is_latest]
+    keys = [(key, datetime.strptime(regex.search(key.name).group(1), '%m-%d-%Y')) for key in keys if regex.match(key.name)]
+    latest_key = max(keys, key=itemgetter(1))[0]
+    return latest_key
 
 
 def upload_results(frame):
@@ -65,6 +66,11 @@ def get_price_data(item_frame):
                     else:
                         lowest_new_price = 999
 
+                    if hasattr(item, 'DetailPageURL'):
+                        url = item.DetailPageURL
+                    else:
+                        url = ''
+
                     price = min(lowest_used_price, lowest_new_price)
                     profit = (trade_value - price) - 3.99
                     roi = round(float(profit / price * 100), 2)
@@ -79,6 +85,7 @@ def get_price_data(item_frame):
                         item_frame.loc[item_frame['asin'] == asin, 'price'] = price
                         item_frame.loc[item_frame['asin'] == asin, 'profit'] = profit
                         item_frame.loc[item_frame['asin'] == asin, 'roi'] = '${}'.format(roi)
+                        item_frame.loc[item_frame['asin'] == asin, 'url'] = url
                 else:
                     # item_frame.drop(item_frame.loc[item_frame['asin'] == asin])
                     continue
