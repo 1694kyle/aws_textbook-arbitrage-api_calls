@@ -41,11 +41,12 @@ def get_item_frame():
 
 
 def get_price_data(item_frame):
-    global search_date
+    global search_date, items_total, item_count
     for chunk in _chunker(item_frame, 10):
-        asins = [row['asin'] for i, row in chunk.iterrows()]
-        response = amzn_search(asins)
+        isbn10s = [row['isbn10'] for i, row in chunk.iterrows()]
+        response = amzn_search(isbn10s)
         for item in response.Items.Item:
+            item_count += 1
             asin = item.ASIN
             if hasattr(item.ItemAttributes, 'IsEligibleForTradeIn'):
                 trade_in_eligible = bool(item.ItemAttributes.IsEligibleForTradeIn)
@@ -76,21 +77,21 @@ def get_price_data(item_frame):
                     roi = round(float(profit / price * 100), 2)
 
                     if not profit > 10:
-                        # item_frame.drop(item_frame.loc[item_frame['asin'] == asin])
+                        print '{}/{} Not Profitable - {}'.format(item_count, items_total, asin)
                         continue
                     else:
-                        print 'Profit Found\n\tASIN - {}\n\tPrice - {}\n\tProfit - {}\n\tROI - {}'.format(asin, price, profit, roi)
-                        item_frame.loc[item_frame['asin'] == asin, 'trade_in_eligible'] = trade_in_eligible
-                        item_frame.loc[item_frame['asin'] == asin, 'trade_value'] = trade_value
-                        item_frame.loc[item_frame['asin'] == asin, 'price'] = price
-                        item_frame.loc[item_frame['asin'] == asin, 'profit'] = profit
-                        item_frame.loc[item_frame['asin'] == asin, 'roi'] = '${}'.format(roi)
-                        item_frame.loc[item_frame['asin'] == asin, 'url'] = url
+                        print '{}/{} Profit Found\n\tisbn10 - {}\n\tPrice - {}\n\tProfit - {}\n\tROI - {}'.format(item_count, items_total, asin, price, profit, roi)
+                        item_frame.loc[item_frame['isbn10'] == asin, 'trade_in_eligible'] = trade_in_eligible
+                        item_frame.loc[item_frame['isbn10'] == asin, 'trade_value'] = trade_value
+                        item_frame.loc[item_frame['isbn10'] == asin, 'price'] = price
+                        item_frame.loc[item_frame['isbn10'] == asin, 'profit'] = profit
+                        item_frame.loc[item_frame['isbn10'] == asin, 'roi'] = '${}'.format(roi)
+                        item_frame.loc[item_frame['isbn10'] == asin, 'url'] = url
                 else:
-                    # item_frame.drop(item_frame.loc[item_frame['asin'] == asin])
+                    # item_frame.drop(item_frame.loc[item_frame['isbn10'] == isbn10])
                     continue
             else:
-                # item_frame.drop(item_frame.loc[item_frame['asin'] == asin])
+                # item_frame.drop(item_frame.loc[item_frame['isbn10'] == isbn10])
                 continue
 
     result_frame = item_frame.dropna()
@@ -98,17 +99,18 @@ def get_price_data(item_frame):
     return result_frame
 
 
-def amzn_search(asins):
+def amzn_search(isbn10s):
     api = API(locale='us')
-    response = _get_amzn_response(asins, api)
+    response = _get_amzn_response(isbn10s, api)
     if not response:
         return None
     else:
         return response
 
 
-def _get_amzn_response(asins, api):
-    query = 'response = api.item_lookup(",".join(asins), ResponseGroup="Large")'
+def _get_amzn_response(isbn10s, api):
+    global items_total
+    query = 'response = api.item_lookup(",".join(isbn10s), ResponseGroup="Large")'
     err_count = 0
     while True:
         try:
@@ -117,10 +119,11 @@ def _get_amzn_response(asins, api):
 
         except AWSError, e:
             err_count += 1
-            print 'AWS Error: {}'.format(e.code)
-            if e[1] in asins:
-                asins.remove(e[1])
-                print '\t{} Dropped - Not ASIN'.format(e[1])
+            # print 'AWS Error: {}'.format(e.code)
+            if e[1] in isbn10s:
+                isbn10s.remove(e[1])
+                items_total -= 1
+                # print '\t{} Dropped - Not asin'.format(e[1])
             if err_count > 10:
                 return None
             time.sleep(2)
@@ -169,7 +172,7 @@ def send_mail_via_smtp():
 
 
 if __name__ == '__main__':
-    conn = boto.connect_s3()
+    conn = boto.connect_s3(os.environ['AWS_ACCESS_KEY'], os.environ['AWS_SECRET_KEY'])
     bucket = conn.get_bucket('textbook-arbitrage')
     api_cols = ['trade_in_eligible', 'trade_value', 'price', 'profit', 'roi', 'url']
     search_date = ''
@@ -177,6 +180,8 @@ if __name__ == '__main__':
     latest_items_key = item_keys(keys)
 
     frame = get_item_frame()
+    item_count = 0
+    items_total = len(frame)
     price_frame = get_price_data(frame)
     upload_results(price_frame)
 
