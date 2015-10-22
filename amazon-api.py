@@ -120,10 +120,13 @@ def _get_amzn_response(isbn10s, api):
         except AWSError, e:
             err_count += 1
             # print 'AWS Error: {}'.format(e.code)
-            if e[1] in isbn10s:
-                isbn10s.remove(e[1])
-                items_total -= 1
-                # print '\t{} Dropped - Not asin'.format(e[1])
+            try:
+                if e[1] in isbn10s:
+                    isbn10s.remove(e[1])
+                    items_total -= 1
+                    # print '\t{} Dropped - Not asin'.format(e[1])
+            except:
+                pass
             if err_count > 10:
                 return None
             time.sleep(2)
