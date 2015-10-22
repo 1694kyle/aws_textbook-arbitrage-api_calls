@@ -44,7 +44,10 @@ def get_price_data(item_frame):
     global search_date, items_total, item_count
     for chunk in _chunker(item_frame, 10):
         isbn10s = [row['isbn10'] for i, row in chunk.iterrows()]
-        response = amzn_search(isbn10s)
+        try:
+            response = amzn_search(isbn10s)
+        except:
+            continue
         for item in response.Items.Item:
             item_count += 1
             asin = item.ASIN
