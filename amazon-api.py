@@ -36,6 +36,7 @@ def upload_results(frame):
 
 def get_item_frame():
     frame = pd.DataFrame.from_csv(latest_items_key)
+    # frame = frame.sort('trade_eligible')
     for col in api_cols:
         frame[col] = np.nan
 
