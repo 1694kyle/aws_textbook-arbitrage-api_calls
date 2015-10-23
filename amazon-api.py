@@ -47,7 +47,7 @@ def get_item_frame():
 
 
 def get_price_data(item_frame):
-    global search_date, items_total, item_count
+    global search_date, items_total, item_count, profitable_item_count
     for chunk in _chunker(item_frame, 10):
         isbn10s = [row['isbn10'] for i, row in chunk.iterrows()]
         try:
@@ -104,6 +104,7 @@ def get_price_data(item_frame):
                         item_frame.loc[item_frame['isbn10'] == asin, 'profit'] = profit
                         item_frame.loc[item_frame['isbn10'] == asin, 'roi'] = '${}'.format(roi)
                         item_frame.loc[item_frame['isbn10'] == asin, 'url'] = url
+                        profitable_item_count += 1
                 else:
                     print '{}/{} Not Trade Eligible - {}'.format(item_count, items_total, asin)
                     continue
@@ -198,6 +199,7 @@ if __name__ == '__main__':
 
     frame = get_item_frame()
     item_count = 0
+    profitable_item_count = 0
     items_total = len(frame)
     now = time.time()
     price_frame = get_price_data(frame)
