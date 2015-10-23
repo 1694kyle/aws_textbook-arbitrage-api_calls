@@ -204,7 +204,7 @@ if __name__ == '__main__':
     now = time.time()
     price_frame = get_price_data(frame)
     diff = time.time() - now
-    print 'Finished {} Items:\n\t{} Hours\n\t{} Minutes\n\t{} Items/sec'.format(item_count, round(diff/3600, 2), round(diff/60, 2), round(item_count/diff, 2))
+    print 'Finished {} Items:\n\t{} Hours\n\t{} Minutes\n\t{} Items/sec\n\t{} Profitable'.format(item_count, round(diff/3600, 2), round(diff/60, 2), round(item_count/diff, 2), profitable_item_count)
     upload_results(price_frame)
 
 
