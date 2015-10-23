@@ -13,6 +13,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import smtplib
 from operator import itemgetter
+import time
 
 def item_keys(keys):
     regex = re.compile(r'scraping_items\/items-(.+)\.csv')
@@ -129,12 +130,10 @@ def _get_amzn_response(isbn10s, api):
             return response
         except AWSError, e:
             err_count += 1
-            # print 'AWS Error: {}'.format(e.code)
             try:
                 if e[1] in isbn10s:
                     isbn10s.remove(e[1])
                     items_total -= 1
-                    # print '\t{} Dropped - Not asin'.format(e[1])
             except:
                 pass
             if err_count > 10:
@@ -195,7 +194,10 @@ if __name__ == '__main__':
     frame = get_item_frame()
     item_count = 0
     items_total = len(frame)
+    now = time.time()
     price_frame = get_price_data(frame)
+    diff = now - time.time()
+    print r'Finished {} Items:\n\t{} Hours\n\t{} Minutes\n\t{} Items/sec'.format(item_count, round(diff/3600, 2), round(diff/60, 2), round(item_count/diff, 2))
     upload_results(price_frame)
 
 
