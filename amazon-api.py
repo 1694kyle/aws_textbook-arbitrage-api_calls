@@ -113,7 +113,7 @@ def get_price_data(item_frame):
 def amzn_search(isbn10s):
     api = API(locale='us')
     response = _get_amzn_response(isbn10s, api)
-    if not response:
+    if response is None:
         return None
     else:
         return response
