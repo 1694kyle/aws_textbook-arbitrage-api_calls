@@ -37,7 +37,8 @@ def upload_results(frame):
 def get_item_frame():
     frame = pd.DataFrame.from_csv(latest_items_key)
     try:
-        frame = frame.sort('trade_eligible')
+        frame = frame.sort('trade_eligible', ascending=False)
+        frame = frame.drop('_type', axis=1)
     except KeyError:
         pass
     for col in api_cols:
