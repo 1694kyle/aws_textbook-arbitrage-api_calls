@@ -99,10 +99,10 @@ def get_price_data(item_frame):
                         item_frame.loc[item_frame['isbn10'] == asin, 'roi'] = '${}'.format(roi)
                         item_frame.loc[item_frame['isbn10'] == asin, 'url'] = url
                 else:
-                    # item_frame.drop(item_frame.loc[item_frame['isbn10'] == isbn10])
+                    print '{}/{} Not Trade Eligible - {}'.format(item_count, items_total, asin)
                     continue
             else:
-                # item_frame.drop(item_frame.loc[item_frame['isbn10'] == isbn10])
+                print '{}/{} Not Trade Eligible - {}'.format(item_count, items_total, asin)
                 continue
 
     result_frame = item_frame.dropna()
@@ -127,7 +127,6 @@ def _get_amzn_response(isbn10s, api):
         try:
             exec(query)
             return response
-
         except AWSError, e:
             err_count += 1
             # print 'AWS Error: {}'.format(e.code)
