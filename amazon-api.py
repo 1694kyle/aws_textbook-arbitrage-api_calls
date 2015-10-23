@@ -95,9 +95,12 @@ def get_price_data(item_frame):
                     roi = round(float(profit / price * 100), 2)
 
                     if not profit > 10:
+                        write(LOCAL_LOG_FILE, '{}/{} Not Profitable - {}'.format(item_count, items_total, asin))
                         print '{}/{} Not Profitable - {}'.format(item_count, items_total, asin)
                         continue
                     else:
+                        write(LOCAL_LOG_FILE, '{}/{} Profit Found\n\tisbn10 - {}\n\tPrice - {}\n\tProfit - {}\n\tROI - {}'.format(item_count, items_total, asin, price, profit, roi))
+                        write(LOCAL_ITEM_LOG, '{}/{} Profit Found\n\tisbn10 - {}\n\tPrice - {}\n\tProfit - {}\n\tROI - {}'.format(item_count, items_total, asin, price, profit, roi))
                         print '{}/{} Profit Found\n\tisbn10 - {}\n\tPrice - {}\n\tProfit - {}\n\tROI - {}'.format(item_count, items_total, asin, price, profit, roi)
                         item_frame.loc[item_frame['isbn10'] == asin, 'trade_in_eligible'] = trade_in_eligible
                         item_frame.loc[item_frame['isbn10'] == asin, 'trade_value'] = trade_value
@@ -107,9 +110,11 @@ def get_price_data(item_frame):
                         item_frame.loc[item_frame['isbn10'] == asin, 'url'] = url
                         profitable_item_count += 1
                 else:
+                    write(LOCAL_LOG_FILE, '{}/{} Not Trade Eligible - {}'.format(item_count, items_total, asin))
                     print '{}/{} Not Trade Eligible - {}'.format(item_count, items_total, asin)
                     continue
             else:
+                write(LOCAL_LOG_FILE, '{}/{} Not Trade Eligible - {}'.format(item_count, items_total, asin))
                 print '{}/{} Not Trade Eligible - {}'.format(item_count, items_total, asin)
                 continue
 
@@ -153,6 +158,12 @@ def _chunker(seq, size):
     return (seq[pos:pos + size] for pos in xrange(0, len(seq), size))
 
 
+def write(file_path, text):
+    with open(file_path, 'a') as f:
+        f.write(text)
+        f.write('\n')
+
+
 def send_mail_via_smtp():
     global search_date
     username = os.environ['YAHOO_USERNAME'] + '@yahoo.com'
@@ -184,9 +195,11 @@ def send_mail_via_smtp():
         smtpserver.login(username, password)
         fromaddr = username
         smtpserver.sendmail(fromaddr, recipients_emails, msg.as_string())
+        write(LOCAL_LOG_FILE, '{0} EMAIL SENT {0}'.format('*' * 10))
         print '{0} EMAIL SENT {0}'.format('*' * 10)
     except Exception as e:
-        print "failed to send mail"
+        write(LOCAL_LOG_FILE, 'faield to send email')
+        print "failed to send email"
         print e
 
 
@@ -194,9 +207,22 @@ if __name__ == '__main__':
     conn = boto.connect_s3(os.environ['AWS_ACCESS_KEY'], os.environ['AWS_SECRET_KEY'])
     bucket = conn.get_bucket('textbook-arbitrage')
     api_cols = ['trade_in_eligible', 'trade_value', 'price', 'profit', 'roi', 'url']
+    date = datetime.datetime.today().date().strftime('%m-%d-%Y')
     search_date = ''
     keys = bucket.list()
     latest_items_key = item_keys(keys)
+
+    LOCAL_OUTPUT_DIR = os.path.join(os.environ.get('HOME'), 'Desktop', 'Scraping Results')
+    LOCAL_OUTPUT_FILE = os.path.join(LOCAL_OUTPUT_DIR, 'Results/results {}'.format(date))
+    LOCAL_ITEM_LOG = os.path.join(LOCAL_OUTPUT_DIR, 'Items/items {}'.format(date))
+    LOCAL_LOG_FILE = os.path.join(LOCAL_OUTPUT_DIR, 'Logs/log {}'.format(date))
+    if not os.path.isdir(os.path.join(LOCAL_OUTPUT_DIR, 'Results')): os.makedirs(os.path.join(LOCAL_OUTPUT_DIR, 'Results'))
+    if not os.path.isdir(os.path.join(LOCAL_OUTPUT_DIR, 'Items')): os.makedirs(os.path.join(LOCAL_OUTPUT_DIR, 'Items'))
+    if not os.path.isdir(os.path.join(LOCAL_OUTPUT_DIR, 'Logs')): os.makedirs(os.path.join(LOCAL_OUTPUT_DIR, 'Logs'))
+    open(LOCAL_OUTPUT_FILE, 'wb').close()
+    open(LOCAL_ITEM_LOG, 'wb').close()
+    open(LOCAL_LOG_FILE, 'wb').close()
+
 
     frame = get_item_frame()
     item_count = 0
@@ -205,8 +231,10 @@ if __name__ == '__main__':
     now = time.time()
     price_frame = get_price_data(frame)
     diff = time.time() - now
+
+    write(LOCAL_LOG_FILE, 'Finished {} Items:\n\t{} Hours\n\t{} Minutes\n\t{} Items/sec\n\t{} Profitable'.format(item_count, round(diff/3600, 2), round(diff/60, 2), round(item_count/diff, 2), profitable_item_count))
     print 'Finished {} Items:\n\t{} Hours\n\t{} Minutes\n\t{} Items/sec\n\t{} Profitable'.format(item_count, round(diff/3600, 2), round(diff/60, 2), round(item_count/diff, 2), profitable_item_count)
     upload_results(price_frame)
 
-
+    write(LOCAL_LOG_FILE, 'finished')
     print 'finished'
