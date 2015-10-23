@@ -100,7 +100,7 @@ def get_price_data(item_frame):
                         continue
                     else:
                         write(LOCAL_LOG_FILE, '{}/{} Profit Found\n\tisbn10 - {}\n\tPrice - {}\n\tProfit - {}\n\tROI - {}'.format(item_count, items_total, asin, price, profit, roi))
-                        write(LOCAL_ITEM_LOG, '{}/{} Profit Found\n\tisbn10 - {}\n\tPrice - {}\n\tProfit - {}\n\tROI - {}'.format(item_count, items_total, asin, price, profit, roi))
+                        write(LOCAL_OUTPUT_FILE, '{}/{} Profit Found\n\tisbn10 - {}\n\tPrice - {}\n\tProfit - {}\n\tROI - {}'.format(item_count, items_total, asin, price, profit, roi))
                         print '{}/{} Profit Found\n\tisbn10 - {}\n\tPrice - {}\n\tProfit - {}\n\tROI - {}'.format(item_count, items_total, asin, price, profit, roi)
                         item_frame.loc[item_frame['isbn10'] == asin, 'trade_in_eligible'] = trade_in_eligible
                         item_frame.loc[item_frame['isbn10'] == asin, 'trade_value'] = trade_value
@@ -207,20 +207,17 @@ if __name__ == '__main__':
     conn = boto.connect_s3(os.environ['AWS_ACCESS_KEY'], os.environ['AWS_SECRET_KEY'])
     bucket = conn.get_bucket('textbook-arbitrage')
     api_cols = ['trade_in_eligible', 'trade_value', 'price', 'profit', 'roi', 'url']
-    date = datetime.datetime.today().date().strftime('%m-%d-%Y')
+    date = datetime.today().date().strftime('%m-%d-%Y')
     search_date = ''
     keys = bucket.list()
     latest_items_key = item_keys(keys)
 
     LOCAL_OUTPUT_DIR = os.path.join(os.environ.get('HOME'), 'Desktop', 'Scraping Results')
     LOCAL_OUTPUT_FILE = os.path.join(LOCAL_OUTPUT_DIR, 'Results/results {}'.format(date))
-    LOCAL_ITEM_LOG = os.path.join(LOCAL_OUTPUT_DIR, 'Items/items {}'.format(date))
     LOCAL_LOG_FILE = os.path.join(LOCAL_OUTPUT_DIR, 'Logs/log {}'.format(date))
     if not os.path.isdir(os.path.join(LOCAL_OUTPUT_DIR, 'Results')): os.makedirs(os.path.join(LOCAL_OUTPUT_DIR, 'Results'))
-    if not os.path.isdir(os.path.join(LOCAL_OUTPUT_DIR, 'Items')): os.makedirs(os.path.join(LOCAL_OUTPUT_DIR, 'Items'))
     if not os.path.isdir(os.path.join(LOCAL_OUTPUT_DIR, 'Logs')): os.makedirs(os.path.join(LOCAL_OUTPUT_DIR, 'Logs'))
     open(LOCAL_OUTPUT_FILE, 'wb').close()
-    open(LOCAL_ITEM_LOG, 'wb').close()
     open(LOCAL_LOG_FILE, 'wb').close()
 
 
@@ -238,3 +235,6 @@ if __name__ == '__main__':
 
     write(LOCAL_LOG_FILE, 'finished')
     print 'finished'
+
+    if os.stat(LOCAL_OUTPUT_FILE).st_size == 0:
+        os.remove(LOCAL_OUTPUT_FILE)
