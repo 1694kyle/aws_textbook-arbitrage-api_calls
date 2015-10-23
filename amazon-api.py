@@ -38,6 +38,7 @@ def get_item_frame():
     frame = pd.DataFrame.from_csv(latest_items_key)
     for col in api_cols:
         frame[col] = np.nan
+
     return frame.reset_index()
 
 
@@ -196,8 +197,8 @@ if __name__ == '__main__':
     items_total = len(frame)
     now = time.time()
     price_frame = get_price_data(frame)
-    diff = now - time.time()
-    print r'Finished {} Items:\n\t{} Hours\n\t{} Minutes\n\t{} Items/sec'.format(item_count, round(diff/3600, 2), round(diff/60, 2), round(item_count/diff, 2))
+    diff = time.time() - now
+    print 'Finished {} Items:\n\t{} Hours\n\t{} Minutes\n\t{} Items/sec'.format(item_count, round(diff/3600, 2), round(diff/60, 2), round(item_count/diff, 2))
     upload_results(price_frame)
 
 
