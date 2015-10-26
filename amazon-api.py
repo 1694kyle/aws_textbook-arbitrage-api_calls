@@ -100,7 +100,7 @@ def get_price_data(item_frame):
                         continue
                     else:
                         write(LOCAL_LOG_FILE, '{}/{} Profit Found\n\tisbn10 - {}\n\tPrice - {}\n\tProfit - {}\n\tROI - {}'.format(item_count, items_total, asin, price, profit, roi))
-                        write(LOCAL_OUTPUT_FILE, '{}/{} Profit Found\n\tisbn10 - {}\n\tPrice - {}\n\tProfit - {}\n\tROI - {}'.format(item_count, items_total, asin, price, profit, roi))
+                        write(LOCAL_OUTPUT_FILE, '(),(),{},{},{}'.format(asin, price, profit, roi, url))
                         print '{}/{} Profit Found\n\tisbn10 - {}\n\tPrice - {}\n\tProfit - {}\n\tROI - {}'.format(item_count, items_total, asin, price, profit, roi)
                         item_frame.loc[item_frame['isbn10'] == asin, 'trade_in_eligible'] = trade_in_eligible
                         item_frame.loc[item_frame['isbn10'] == asin, 'trade_value'] = trade_value
