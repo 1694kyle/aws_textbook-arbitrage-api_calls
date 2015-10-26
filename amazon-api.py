@@ -22,16 +22,21 @@ def item_keys(keys):
     return latest_key
 
 
-def upload_results(frame):
+def upload_frame(frame, type):
     global search_date
-    if len(frame) == 0:
-        return None
     k = Key(bucket)
     search_date = latest_items_key.name[latest_items_key.name.index('items-') + len('items-'):]
-    k.key = '/api_results/results-{}'.format(search_date)
-    k.set_contents_from_string(frame.to_csv())
-    send_mail_via_smtp()
-    os.remove('results.csv')
+    if type == 'result':
+        if len(frame) == 0:
+            return None
+        k.key = '/api_results/results-{}'.format(search_date)
+        k.set_contents_from_string(frame.to_csv())
+        send_mail_via_smtp()
+        os.remove('results.csv')
+    else:
+        k.key = '/scraping_items/items-{}'.format(search_date)
+        k.set_contents_from_string(frame.to_csv())
+
 
 
 def get_item_frame():
@@ -127,11 +132,15 @@ def get_price_data(item_frame):
                 else:
                     write(LOCAL_LOG_FILE, '{}/{} Not Trade Eligible - {}'.format(item_count, items_total, asin))
                     print '{}/{} Not Trade Eligible - {}'.format(item_count, items_total, asin)
-                    continue
+                    trade_in_eligible = False
+
             else:
                 write(LOCAL_LOG_FILE, '{}/{} Not Trade Eligible - {}'.format(item_count, items_total, asin))
                 print '{}/{} Not Trade Eligible - {}'.format(item_count, items_total, asin)
-                continue
+                trade_in_eligible = False
+
+            if trade_in_eligible is False:
+                frame.drop(frame.loc[item_frame['isbn10'] == asin].index[0], inplace=True)
 
     result_frame = item_frame.dropna()
     result_frame.to_csv('results.csv'.format(search_date))
@@ -219,6 +228,7 @@ def send_mail_via_smtp():
 
 
 if __name__ == '__main__':
+
     conn = boto.connect_s3(os.environ['AWS_ACCESS_KEY'], os.environ['AWS_SECRET_KEY'])
     bucket = conn.get_bucket('textbook-arbitrage')
     api_cols = ['trade_value', 'price', 'profit', 'roi', 'url']
@@ -249,7 +259,9 @@ if __name__ == '__main__':
 
     write(LOCAL_LOG_FILE, 'Finished {} Items:\n\t{} Hours\n\t{} Minutes\n\t{} Items/sec\n\t{} Profitable'.format(item_count, round(diff/3600, 2), round(diff/60, 2), round(item_count/diff, 2), profitable_item_count))
     print 'Finished {} Items:\n\t{} Hours\n\t{} Minutes\n\t{} Items/sec\n\t{} Profitable'.format(item_count, round(diff/3600, 2), round(diff/60, 2), round(item_count/diff, 2), profitable_item_count)
-    upload_results(price_frame)
+
+    upload_frame(price_frame, type='result')  # upload results if any
+    upload_frame(frame, type='update') # overwrite existing items with trimmed down list asins
 
     write(LOCAL_LOG_FILE, 'finished')
     print 'finished'
