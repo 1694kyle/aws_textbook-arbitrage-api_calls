@@ -139,6 +139,7 @@ def get_price_data(item_frame):
                 trade_in_eligible = False
 
             if trade_in_eligible is False:
+                write(LOCAL_DROPPED_FILE, asin.text)
                 drop_isbn10s.append(asin)
 
 
@@ -168,6 +169,7 @@ def _get_amzn_response(isbn10s, api):
             err_count += 1
             try:
                 if e[1] in isbn10s:
+                    write(LOCAL_DROPPED_FILE, e[1])
                     drop_isbn10s.append(e[1])
                     isbn10s.remove(e[1])
                     items_total -= 1
@@ -241,10 +243,12 @@ if __name__ == '__main__':
     drop_isbn10s = []
 
     LOCAL_OUTPUT_DIR = os.path.join(os.environ.get('HOME'), 'Desktop', 'Scraping Results')
-    LOCAL_OUTPUT_FILE = os.path.join(LOCAL_OUTPUT_DIR, 'Results/results {}'.format(date))
-    LOCAL_LOG_FILE = os.path.join(LOCAL_OUTPUT_DIR, 'Logs/log {}'.format(date))
+    LOCAL_OUTPUT_FILE = os.path.join(LOCAL_OUTPUT_DIR, 'Results', 'results {}'.format(date))
+    LOCAL_LOG_FILE = os.path.join(LOCAL_OUTPUT_DIR, 'Logs', 'log {}'.format(date))
+    LOCAL_DROPPED_FILE = os.path.join(LOCAL_OUTPUT_DIR, 'Dropped', 'dropped_items {}'.format(date))
     if not os.path.isdir(os.path.join(LOCAL_OUTPUT_DIR, 'Results')): os.makedirs(os.path.join(LOCAL_OUTPUT_DIR, 'Results'))
     if not os.path.isdir(os.path.join(LOCAL_OUTPUT_DIR, 'Logs')): os.makedirs(os.path.join(LOCAL_OUTPUT_DIR, 'Logs'))
+    if not os.path.isdir(os.path.join(LOCAL_OUTPUT_DIR, 'Dropped')): os.makedirs(os.path.join(LOCAL_OUTPUT_DIR, 'Dropped'))
 
     with open(LOCAL_OUTPUT_FILE,'wb') as f:
         for header in ['asin,', 'price,', 'profit,', 'roi,', 'url\n']:
