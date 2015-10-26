@@ -40,7 +40,8 @@ def upload_frame(frame, type):
 
 
 def get_item_frame():
-    frame = pd.DataFrame.from_csv(latest_items_key)
+    temp_frame = pd.read_csv(latest_items_key, iterator=True, chunksize=1000)
+    frame = pd.concat(temp_frame, ignore_index=True)
     try:
         frame = frame.sort('trade_eligible', ascending=False)
     except KeyError:
@@ -52,7 +53,7 @@ def get_item_frame():
 
 
 def get_price_data(item_frame):
-    global search_date, items_total, item_count, profitable_item_count, drop_isbn10s
+    global search_date, items_total, item_count, profitable_item_count
     for chunk in _chunker(item_frame, 10):
         isbn10s = [row['isbn10'] for i, row in chunk.iterrows()]
         try:
@@ -140,7 +141,7 @@ def get_price_data(item_frame):
 
             if trade_in_eligible is False:
                 write(LOCAL_DROPPED_FILE, asin.text)
-                drop_isbn10s.append(asin)
+                frame.drop(frame.loc[frame['isbn10'] == asin].index[0], inplace=True)
 
 
     result_frame = item_frame.dropna()
@@ -158,7 +159,7 @@ def amzn_search(isbn10s):
 
 
 def _get_amzn_response(isbn10s, api):
-    global items_total, drop_isbn10s
+    global items_total
     query = 'response = api.item_lookup(",".join(isbn10s), ResponseGroup="Large")'
     err_count = 0
     while True:
@@ -170,7 +171,7 @@ def _get_amzn_response(isbn10s, api):
             try:
                 if e[1] in isbn10s:
                     # write(LOCAL_DROPPED_FILE, e[1])
-                    # drop_isbn10s.append(e[1])
+
                     isbn10s.remove(e[1])
                     items_total -= 1
             except:
@@ -240,8 +241,6 @@ if __name__ == '__main__':
     keys = bucket.list()
     latest_items_key = item_keys(keys)
 
-    drop_isbn10s = []
-
     LOCAL_OUTPUT_DIR = os.path.join(os.environ.get('HOME'), 'Desktop', 'Scraping Results')
     LOCAL_OUTPUT_FILE = os.path.join(LOCAL_OUTPUT_DIR, 'Results', 'results {}'.format(date))
     LOCAL_LOG_FILE = os.path.join(LOCAL_OUTPUT_DIR, 'Logs', 'log {}'.format(date))
@@ -256,7 +255,7 @@ if __name__ == '__main__':
     open(LOCAL_LOG_FILE, 'wb').close()
 
 
-    frame = get_item_frame()
+    frame = get_item_frame()  # todo: make generator and write modifications in-place
     item_count = 0
     profitable_item_count = 0
     items_total = len(frame)
@@ -269,8 +268,6 @@ if __name__ == '__main__':
 
     upload_frame(price_frame, type='result')  # upload results if any
 
-    for isbn10 in list(set(drop_isbn10s)):
-        frame.drop(frame.loc[frame['isbn10'] == isbn10].index[0], inplace=True)
     upload_frame(frame, type='update') # overwrite existing items with trimmed down list asins
 
     write(LOCAL_LOG_FILE, 'finished')
