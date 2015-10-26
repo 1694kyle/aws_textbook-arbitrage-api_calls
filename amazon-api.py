@@ -221,7 +221,7 @@ def send_mail_via_smtp():
 if __name__ == '__main__':
     conn = boto.connect_s3(os.environ['AWS_ACCESS_KEY'], os.environ['AWS_SECRET_KEY'])
     bucket = conn.get_bucket('textbook-arbitrage')
-    api_cols = ['trade_in_eligible', 'trade_value', 'price', 'profit', 'roi', 'url']
+    api_cols = ['trade_value', 'price', 'profit', 'roi', 'url']
     date = datetime.today().date().strftime('%m-%d-%Y')
     search_date = ''
     keys = bucket.list()
