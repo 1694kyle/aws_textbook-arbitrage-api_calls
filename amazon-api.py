@@ -269,7 +269,7 @@ if __name__ == '__main__':
 
     upload_frame(price_frame, type='result')  # upload results if any
 
-    for isbn10 in drop_isbn10s:
+    for isbn10 in list(set(drop_isbn10s)):
         frame.drop(frame.loc[frame['isbn10'] == isbn10].index[0], inplace=True)
     upload_frame(frame, type='update') # overwrite existing items with trimmed down list asins
 

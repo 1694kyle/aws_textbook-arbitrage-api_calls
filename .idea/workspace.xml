@@ -27,8 +27,8 @@
       <file leaf-file-name="amazon-api.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/amazon-api.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-2.3021584">
-              <caret line="149" column="0" selection-start-line="149" selection-start-column="0" selection-end-line="149" selection-end-column="0" />
+            <state vertical-scroll-proportion="0.57194245">
+              <caret line="271" column="41" selection-start-line="271" selection-start-column="41" selection-end-line="271" selection-end-column="41" />
               <folding>
                 <element signature="e#0#33#0" expanded="true" />
               </folding>
@@ -493,7 +493,13 @@
       <option name="project" value="LOCAL" />
       <updated>1445892523093</updated>
     </task>
-    <option name="localTasksCounter" value="35" />
+    <task id="LOCAL-00035" summary="init">
+      <created>1445893118929</created>
+      <option name="number" value="00035" />
+      <option name="project" value="LOCAL" />
+      <updated>1445893118929</updated>
+    </task>
+    <option name="localTasksCounter" value="36" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -682,8 +688,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/amazon-api.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-2.3021584">
-          <caret line="149" column="0" selection-start-line="149" selection-start-column="0" selection-end-line="149" selection-end-column="0" />
+        <state vertical-scroll-proportion="0.57194245">
+          <caret line="271" column="41" selection-start-line="271" selection-start-column="41" selection-end-line="271" selection-end-column="41" />
           <folding>
             <element signature="e#0#33#0" expanded="true" />
           </folding>
