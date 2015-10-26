@@ -67,26 +67,41 @@ def get_price_data(item_frame):
             item_count += 1
             asin = item.ASIN
             if hasattr(item.ItemAttributes, 'IsEligibleForTradeIn'):
-                trade_in_eligible = bool(item.ItemAttributes.IsEligibleForTradeIn)
+                try:
+                    trade_in_eligible = bool(item.ItemAttributes.IsEligibleForTradeIn)
+                except:
+                    trade_in_eligible = False
 
                 if trade_in_eligible:
                     if hasattr(item.ItemAttributes, 'TradeInValue'):
-                        trade_value = item.ItemAttributes.TradeInValue.Amount / 100.0
+                        try:
+                            trade_value = item.ItemAttributes.TradeInValue.Amount / 100.0
+                        except:
+                            trade_value = 0
                     else:
                         trade_value = 0
 
                     if hasattr(item.OfferSummary, 'LowestUsedPrice'):
-                        lowest_used_price = item.OfferSummary.LowestUsedPrice.Amount / 100.0
+                        try:
+                            lowest_used_price = item.OfferSummary.LowestUsedPrice.Amount / 100.0
+                        except:
+                            lowest_used_price = 999
                     else:
                         lowest_used_price = 999
 
                     if hasattr(item.OfferSummary, 'LowestNewPrice'):
-                        lowest_new_price = item.OfferSummary.LowestNewPrice.Amount / 100.0
+                        try:
+                            lowest_new_price = item.OfferSummary.LowestNewPrice.Amount / 100.0
+                        except:
+                            lowest_new_price = 999
                     else:
                         lowest_new_price = 999
 
                     if hasattr(item, 'DetailPageURL'):
-                        url = item.DetailPageURL
+                        try:
+                            url = item.DetailPageURL
+                        except:
+                            url = ''
                     else:
                         url = ''
 
