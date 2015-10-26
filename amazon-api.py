@@ -91,7 +91,7 @@ def get_price_data(item_frame):
                         url = ''
 
                     price = min(lowest_used_price, lowest_new_price)
-                    profit = (trade_value - price) - 3.99
+                    profit = 30#(trade_value - price) - 3.99
                     roi = round(float(profit / price * 100), 2)
 
                     if not profit > 10:
@@ -100,7 +100,7 @@ def get_price_data(item_frame):
                         continue
                     else:
                         write(LOCAL_LOG_FILE, '{}/{} Profit Found\n\tisbn10 - {}\n\tPrice - {}\n\tProfit - {}\n\tROI - {}'.format(item_count, items_total, asin, price, profit, roi))
-                        write(LOCAL_OUTPUT_FILE, '(),(),{},{},{}'.format(asin, price, profit, roi, url))
+                        write(LOCAL_OUTPUT_FILE, '{},{},{},{},{}'.format(asin, price, profit, roi, url))
                         print '{}/{} Profit Found\n\tisbn10 - {}\n\tPrice - {}\n\tProfit - {}\n\tROI - {}'.format(item_count, items_total, asin, price, profit, roi)
                         item_frame.loc[item_frame['isbn10'] == asin, 'trade_in_eligible'] = trade_in_eligible
                         item_frame.loc[item_frame['isbn10'] == asin, 'trade_value'] = trade_value
@@ -217,7 +217,10 @@ if __name__ == '__main__':
     LOCAL_LOG_FILE = os.path.join(LOCAL_OUTPUT_DIR, 'Logs/log {}'.format(date))
     if not os.path.isdir(os.path.join(LOCAL_OUTPUT_DIR, 'Results')): os.makedirs(os.path.join(LOCAL_OUTPUT_DIR, 'Results'))
     if not os.path.isdir(os.path.join(LOCAL_OUTPUT_DIR, 'Logs')): os.makedirs(os.path.join(LOCAL_OUTPUT_DIR, 'Logs'))
-    open(LOCAL_OUTPUT_FILE, 'wb').close()
+
+    with open(LOCAL_OUTPUT_FILE,'wb') as f:
+        for header in ['asin,', 'price,', 'profit,', 'roi,', 'url\n']:
+            f.write(header)
     open(LOCAL_LOG_FILE, 'wb').close()
 
 
