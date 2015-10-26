@@ -27,8 +27,8 @@
       <file leaf-file-name="amazon-api.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/amazon-api.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.10990991">
-              <caret line="112" column="107" selection-start-line="112" selection-start-column="107" selection-end-line="112" selection-end-column="107" />
+            <state vertical-scroll-proportion="0.21010101">
+              <caret line="93" column="29" selection-start-line="93" selection-start-column="29" selection-end-line="93" selection-end-column="29" />
               <folding>
                 <element signature="e#0#33#0" expanded="true" />
               </folding>
@@ -452,7 +452,19 @@
       <option name="project" value="LOCAL" />
       <updated>1445642255017</updated>
     </task>
-    <option name="localTasksCounter" value="28" />
+    <task id="LOCAL-00028" summary="init">
+      <created>1445871519357</created>
+      <option name="number" value="00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1445871519357</updated>
+    </task>
+    <task id="LOCAL-00029" summary="init">
+      <created>1445871954776</created>
+      <option name="number" value="00029" />
+      <option name="project" value="LOCAL" />
+      <updated>1445871954776</updated>
+    </task>
+    <option name="localTasksCounter" value="30" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -466,11 +478,11 @@
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32912844" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.328" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.328" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.39657143" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.39657143" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -503,11 +515,6 @@
           <line>130</line>
           <option name="timeStamp" value="37" />
         </line-breakpoint>
-        <line-breakpoint enabled="true" type="python-line">
-          <url>file://$PROJECT_DIR$/amazon-api.py</url>
-          <line>43</line>
-          <option name="timeStamp" value="47" />
-        </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
         <breakpoint type="python-exception">
@@ -516,7 +523,7 @@
           </properties>
         </breakpoint>
       </default-breakpoints>
-      <option name="time" value="49" />
+      <option name="time" value="50" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -640,8 +647,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/amazon-api.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.10990991">
-          <caret line="112" column="107" selection-start-line="112" selection-start-column="107" selection-end-line="112" selection-end-column="107" />
+        <state vertical-scroll-proportion="0.21010101">
+          <caret line="93" column="29" selection-start-line="93" selection-start-column="29" selection-end-line="93" selection-end-column="29" />
           <folding>
             <element signature="e#0#33#0" expanded="true" />
           </folding>
