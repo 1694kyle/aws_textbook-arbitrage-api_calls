@@ -15,6 +15,7 @@ import smtplib
 from operator import itemgetter
 import time
 
+
 def item_keys(keys):
     regex = re.compile(r'scraping_items\/items-(.+)\.csv')
     keys = [(key, datetime.strptime(regex.search(key.name).group(1), '%m-%d-%Y')) for key in keys if regex.match(key.name)]
@@ -30,20 +31,18 @@ def upload_frame(frame, type):
         if len(frame) == 0:
             return None
         k.key = '/api_results/results-{}'.format(search_date)
-        k.set_contents_from_string(frame.to_csv())
+        k.set_contents_from_string(frame.to_csv(index=False))
         send_mail_via_smtp()
         os.remove('results.csv')
     else:
         k.key = '/scraping_items/items-{}'.format(search_date)
-        k.set_contents_from_string(frame.to_csv())
-
+        k.set_contents_from_string(frame.to_csv(columns=['isbn10', 'trade_eligible'], index=False))
 
 
 def get_item_frame():
     frame = pd.DataFrame.from_csv(latest_items_key)
     try:
         frame = frame.sort('trade_eligible', ascending=False)
-        frame = frame.drop('_type', axis=1)
     except KeyError:
         pass
     for col in api_cols:
@@ -53,7 +52,7 @@ def get_item_frame():
 
 
 def get_price_data(item_frame):
-    global search_date, items_total, item_count, profitable_item_count
+    global search_date, items_total, item_count, profitable_item_count, drop_isbn10s
     for chunk in _chunker(item_frame, 10):
         isbn10s = [row['isbn10'] for i, row in chunk.iterrows()]
         try:
@@ -140,7 +139,8 @@ def get_price_data(item_frame):
                 trade_in_eligible = False
 
             if trade_in_eligible is False:
-                frame.drop(frame.loc[item_frame['isbn10'] == asin].index[0], inplace=True)
+                drop_isbn10s.append(asin)
+
 
     result_frame = item_frame.dropna()
     result_frame.to_csv('results.csv'.format(search_date))
@@ -157,7 +157,7 @@ def amzn_search(isbn10s):
 
 
 def _get_amzn_response(isbn10s, api):
-    global items_total
+    global items_total, drop_isbn10s
     query = 'response = api.item_lookup(",".join(isbn10s), ResponseGroup="Large")'
     err_count = 0
     while True:
@@ -168,6 +168,7 @@ def _get_amzn_response(isbn10s, api):
             err_count += 1
             try:
                 if e[1] in isbn10s:
+                    drop_isbn10s.append(e[1])
                     isbn10s.remove(e[1])
                     items_total -= 1
             except:
@@ -237,6 +238,8 @@ if __name__ == '__main__':
     keys = bucket.list()
     latest_items_key = item_keys(keys)
 
+    drop_isbn10s = []
+
     LOCAL_OUTPUT_DIR = os.path.join(os.environ.get('HOME'), 'Desktop', 'Scraping Results')
     LOCAL_OUTPUT_FILE = os.path.join(LOCAL_OUTPUT_DIR, 'Results/results {}'.format(date))
     LOCAL_LOG_FILE = os.path.join(LOCAL_OUTPUT_DIR, 'Logs/log {}'.format(date))
@@ -261,6 +264,9 @@ if __name__ == '__main__':
     print 'Finished {} Items:\n\t{} Hours\n\t{} Minutes\n\t{} Items/sec\n\t{} Profitable'.format(item_count, round(diff/3600, 2), round(diff/60, 2), round(item_count/diff, 2), profitable_item_count)
 
     upload_frame(price_frame, type='result')  # upload results if any
+
+    for isbn10 in drop_isbn10s:
+        frame.drop(frame.loc[frame['isbn10'] == isbn10].index[0], inplace=True)
     upload_frame(frame, type='update') # overwrite existing items with trimmed down list asins
 
     write(LOCAL_LOG_FILE, 'finished')
