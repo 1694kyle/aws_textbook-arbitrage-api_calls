@@ -169,8 +169,8 @@ def _get_amzn_response(isbn10s, api):
             err_count += 1
             try:
                 if e[1] in isbn10s:
-                    write(LOCAL_DROPPED_FILE, e[1])
-                    drop_isbn10s.append(e[1])
+                    # write(LOCAL_DROPPED_FILE, e[1])
+                    # drop_isbn10s.append(e[1])
                     isbn10s.remove(e[1])
                     items_total -= 1
             except:
