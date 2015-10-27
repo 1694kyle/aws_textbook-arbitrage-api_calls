@@ -6,6 +6,9 @@ from amazonproduct.errors import AWSError
 from operator import itemgetter
 import re
 import boto
+import csv
+import urllib2
+import operator
 
 
 def item_keys(keys):
@@ -112,9 +115,14 @@ def check_profit(items):
             write('{0}, {1}, {2}, {3}, {4}\n'.format(item.ASIN, price, profit, roi, url), fname=profitable_file)
 
 
-def main(asins, max_depth):
+def main(asin_key, max_depth):
     global count, items
-    for asin in asins:
+    response = urllib2.urlopen(asin_key.generate_url(5))
+    asin_csv = csv.reader(response)
+    asin_csv.next()
+    asin_csv = sorted(asin_csv, key=operator.itemgetter(1), reverse=True)
+    for row in asin_csv:
+        asin = row[0]
         write('{}{}'.format('\t' * depth, asin), log_file)
         next_asin_set = get_similar_items(asin, max_depth)
         check_profit(next_asin_set)
@@ -153,7 +161,7 @@ if __name__ == '__main__':
     items = []
     depth = 3
 
-    main(item_keys, depth)
+    main(latest_items_key, depth)
 
     if profit_count > 0:
         send_mail_via_smtp(profitable_file)
