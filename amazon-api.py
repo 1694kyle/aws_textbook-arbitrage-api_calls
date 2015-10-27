@@ -15,6 +15,8 @@ import smtplib
 from operator import itemgetter
 import time
 
+from result_email import send_mail_via_smtp
+
 
 def item_keys(keys):
     regex = re.compile(r'scraping_items\/items-(.+)\.csv')
@@ -192,43 +194,7 @@ def write(file_path, text):
         f.write('\n')
 
 
-def send_mail_via_smtp():
-    global search_date
-    username = os.environ['YAHOO_USERNAME'] + '@yahoo.com'
-    password = os.environ['YAHOO_PASSWORD']
 
-    recipients_emails = 'kylebonnet@gmail.com'
-
-    body = 'GET SOME'
-
-    msg = MIMEMultipart(
-        From=username,
-        To=recipients_emails,
-        Subject='Textbook Arbitrage Results - {}'.format(search_date)
-    )
-
-    msg.attach(MIMEText(body))
-
-    msg.attach(MIMEApplication(
-        open('results.csv'.format(search_date)).read(),
-        Content_Disposition='attachment; filename=results - {}'.format(search_date),
-        Name='results - {}'.format(search_date)
-    ))
-
-    try:
-        smtpserver = smtplib.SMTP("smtp.mail.yahoo.com", 587)
-        smtpserver.ehlo()
-        smtpserver.starttls()
-        smtpserver.ehlo()
-        smtpserver.login(username, password)
-        fromaddr = username
-        smtpserver.sendmail(fromaddr, recipients_emails, msg.as_string())
-        write(LOCAL_LOG_FILE, '{0} EMAIL SENT {0}'.format('*' * 10))
-        print '{0} EMAIL SENT {0}'.format('*' * 10)
-    except Exception as e:
-        write(LOCAL_LOG_FILE, 'faield to send email')
-        print "failed to send email"
-        print e
 
 
 if __name__ == '__main__':

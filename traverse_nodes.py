@@ -1,6 +1,8 @@
 from amazonproduct.api import API
 from datetime import datetime
 import os
+from result_email import send_mail_via_smtp
+
 
 def write(text, fname):
     with open(fname, 'a') as f:
@@ -54,6 +56,7 @@ def trade_eligible(item):
 
 
 def check_profit(item):
+    global profit_count
     if hasattr(item.ItemAttributes, 'TradeInValue'):
         try:
             trade_value = item.ItemAttributes.TradeInValue.Amount / 100.0
@@ -91,6 +94,7 @@ def check_profit(item):
     roi = round(float(profit / price * 100), 2)
 
     if profit > 5:
+        profit_count += 1
         print '\tProfit of {} found - {}'.format(profit, item.ASIN)
         write('{0}, {1}, {2}, {3}, {4}\n'.format(item.ASIN, price, profit, roi, url), fname=profitable_file)
 
@@ -99,6 +103,7 @@ if __name__ == '__main__':
 
     api = API(locale='us')
     count = 0
+    profit_count = 0
 
     date = datetime.today().date()
 
@@ -119,3 +124,6 @@ if __name__ == '__main__':
     items = []
 
     main()
+
+    if profit_count > 0:
+        send_mail_via_smtp(profitable_file)
