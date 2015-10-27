@@ -33,7 +33,7 @@ def main():
 
                 similar = similar_items(item.ASIN.text)
                 for similar_item in similar.Items.Item:
-                    if similar_item.ASIN.text not in items and trade_eligible(similar_item):
+                    if similar_item.ASIN.text not in items and trade_eligible(similar_item) is not None:
                         count += 1
                         write('\t\t{} - {}'.format(count, similar_item.ASIN), fname=log_file)  # write to log file
                         write('{}'.format(similar_item.ASIN), fname=item_file)  # write to item file
@@ -41,7 +41,7 @@ def main():
                     else:
                         continue
 
-                if item.ASIN.text not in items and trade_eligible(item):
+                if item.ASIN.text not in items and trade_eligible(item) is not None:
                     write('{}'.format(item.ASIN), fname=item_file)  # write to item file
                     items.append(item.ASIN.text)
 
