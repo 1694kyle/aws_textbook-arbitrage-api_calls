@@ -1,6 +1,6 @@
 from amazonproduct.api import API
 from datetime import datetime
-
+import os
 
 def write(text, fname):
     with open(fname, 'a') as f:
@@ -102,9 +102,15 @@ if __name__ == '__main__':
 
     date = datetime.today().date()
 
-    item_file = r'output\items.csv'
-    log_file = r'output\log.csv'
-    profitable_file = r'output\profitable - {}.csv'.format(date)
+    LOCAL_OUTPUT_DIR = os.path.join(os.environ.get('HOME'), 'Desktop', 'Traverse Results')
+
+    item_file = os.path.join(LOCAL_OUTPUT_DIR, 'Items', 'items - {}.csv'.format(date))
+    log_file = os.path.join(LOCAL_OUTPUT_DIR, 'Logs', 'log - {}.csv'.format(date))
+    profitable_file = os.path.join(LOCAL_OUTPUT_DIR, 'Profitable', 'profitable - {}.csv'.format(date))
+
+    if not os.path.isdir(os.path.join(LOCAL_OUTPUT_DIR, 'Items')): os.makedirs(os.path.join(LOCAL_OUTPUT_DIR, 'Items'))
+    if not os.path.isdir(os.path.join(LOCAL_OUTPUT_DIR, 'Logs')): os.makedirs(os.path.join(LOCAL_OUTPUT_DIR, 'Logs'))
+    if not os.path.isdir(os.path.join(LOCAL_OUTPUT_DIR, 'Profitable')): os.makedirs(os.path.join(LOCAL_OUTPUT_DIR, 'Profitable'))
 
     open(item_file, 'wb').close()
     open(log_file, 'wb').close()
