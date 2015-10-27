@@ -2,7 +2,7 @@ from amazonproduct.api import API
 from datetime import datetime
 import os
 from result_email import send_mail_via_smtp
-
+from amazonproduct.errors import AWSError
 
 def write(text, fname):
     with open(fname, 'a') as f:
@@ -11,7 +11,10 @@ def write(text, fname):
 
 
 def similar_items(asin):
-    response = api.similarity_lookup(asin, ResponseGroup='Large')
+    try:
+        response = api.similarity_lookup(asin, ResponseGroup='Large')
+    except AWSError
+        response = None
     return response
 
 
@@ -32,14 +35,17 @@ def main():
                 write('\t{} - {}'.format(count, item.ASIN), fname=log_file)  # write to log file
 
                 similar = similar_items(item.ASIN.text)
-                for similar_item in similar.Items.Item:
-                    if similar_item.ASIN.text not in items and trade_eligible(similar_item) is not None:
-                        count += 1
-                        write('\t\t{} - {}'.format(count, similar_item.ASIN), fname=log_file)  # write to log file
-                        write('{}'.format(similar_item.ASIN), fname=item_file)  # write to item file
-                        items.append(similar_item.ASIN.text)
-                    else:
-                        continue
+                if similar is not None:
+                    for similar_item in similar.Items.Item:
+                        if similar_item.ASIN.text not in items and trade_eligible(similar_item) is not None:
+                            count += 1
+                            write('\t\t{} - {}'.format(count, similar_item.ASIN), fname=log_file)  # write to log file
+                            write('{}'.format(similar_item.ASIN), fname=item_file)  # write to item file
+                            items.append(similar_item.ASIN.text)
+                        else:
+                            continue
+                else:
+                    continue
 
                 if item.ASIN.text not in items and trade_eligible(item) is not None:
                     write('{}'.format(item.ASIN), fname=item_file)  # write to item file
