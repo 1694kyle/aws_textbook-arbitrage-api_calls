@@ -116,7 +116,7 @@ def get_price_data(item_frame):
 
                     if not profit > 10:
                         write(LOCAL_LOG_FILE, '{}/{} Not Profitable - {}'.format(item_count, items_total, asin))
-                        print '{}/{} Not Profitable - {}'.format(item_count, items_total, asin)
+                        # print '{}/{} Not Profitable - {}'.format(item_count, items_total, asin)
                         continue
                     else:
                         write(LOCAL_LOG_FILE, '{}/{} Profit Found\n\tisbn10 - {}\n\tPrice - {}\n\tProfit - {}\n\tROI - {}'.format(item_count, items_total, asin, price, profit, roi))
@@ -131,12 +131,12 @@ def get_price_data(item_frame):
                         profitable_item_count += 1
                 else:
                     write(LOCAL_LOG_FILE, '{}/{} Not Trade Eligible - {}'.format(item_count, items_total, asin))
-                    print '{}/{} Not Trade Eligible - {}'.format(item_count, items_total, asin)
+                    # print '{}/{} Not Trade Eligible - {}'.format(item_count, items_total, asin)
                     trade_in_eligible = False
 
             else:
                 write(LOCAL_LOG_FILE, '{}/{} Not Trade Eligible - {}'.format(item_count, items_total, asin))
-                print '{}/{} Not Trade Eligible - {}'.format(item_count, items_total, asin)
+                # print '{}/{} Not Trade Eligible - {}'.format(item_count, items_total, asin)
                 trade_in_eligible = False
 
             if trade_in_eligible is False:
@@ -255,7 +255,7 @@ if __name__ == '__main__':
     open(LOCAL_LOG_FILE, 'wb').close()
 
 
-    frame = get_item_frame()  # todo: make generator and write modifications in-place
+    frame = get_item_frame()  # todo: make generator and write modifications in-place. or if not profitable, drop from this round?
     item_count = 0
     profitable_item_count = 0
     items_total = len(frame)
