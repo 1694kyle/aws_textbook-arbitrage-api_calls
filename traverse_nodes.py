@@ -13,7 +13,7 @@ def write(text, fname):
 def similar_items(asin):
     try:
         response = api.similarity_lookup(asin, ResponseGroup='Large')
-    except AWSError
+    except AWSError:
         response = None
     return response
 
