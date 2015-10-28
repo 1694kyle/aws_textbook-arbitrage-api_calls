@@ -54,7 +54,11 @@ def findem(asin, seen=None, depth=3):
     if depth > 0:
         if seen is None:
             seen = set()
-        found = [item for asin, item in {item.ASIN: item for item in api.similarity_lookup(asin, ResponseGroup='Large').Items.Item if item.ASIN.text not in seen}.iteritems()]
+        try:
+            response = api.similarity_lookup(asin, ResponseGroup='Large')
+        except:
+            response = api.item_lookup(asin, ResponseGroup='Large')
+        found = [item for asin, item in {item.ASIN: item for item in response.Items.Item if item.ASIN.text not in seen}.iteritems()]
         trade_eligible_found = [item for item in found if trade_eligible(item) is not None]
         seen.update([item.ASIN.text for item in trade_eligible_found])
         for item in found:
