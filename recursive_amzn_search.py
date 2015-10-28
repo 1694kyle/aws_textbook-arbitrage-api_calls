@@ -148,7 +148,7 @@ if __name__ == '__main__':
     seen = set()
     date = datetime.today().date()
 
-    LOCAL_OUTPUT_DIR = os.path.join(os.environ.get('HOME'), 'Desktop', 'Traverse Results')
+    LOCAL_OUTPUT_DIR = os.path.join(os.environ.get('HOME'), 'Desktop', 'Recursive Search Results')
 
     item_file = os.path.join(LOCAL_OUTPUT_DIR, 'Items', 'items - {}.csv'.format(date))
     log_file = os.path.join(LOCAL_OUTPUT_DIR, 'Logs', 'log - {}.csv'.format(date))
