@@ -107,12 +107,12 @@ def check_profit(items):
             price = min(lowest_used_price, lowest_new_price)
             profit = (trade_value - price) - 3.99
             roi = round(float(profit / price * 100), 2)
-            print '{}\n\tPrice: {}\n\tProfit: {}\n\tROI: {}'.format(item.ASIN, price, profit, roi)
+            # print '{}\n\tPrice: {}\n\tProfit: {}\n\tROI: {}'.format(item.ASIN, price, profit, roi)
             write(fname=log_file, text='\tPrice: {}\n\tProfit: {}\n\tROI: {}'.format(price, profit, roi))
 
             if profit > 5:
                 profit_count += 1
-                print '\tProfit of {} found - {}'.format(profit, item.ASIN)
+                print 'Profit of {} found - {}'.format(profit, item.ASIN)
                 write('{0}, {1}, {2}, {3}, {4}\n'.format(item.ASIN, price, profit, roi, url), fname=profitable_file)
         else:
             continue
