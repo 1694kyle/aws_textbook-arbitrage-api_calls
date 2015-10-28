@@ -49,17 +49,18 @@ def get_similar_items(asin, depth = 3):
     return similar_items
 
 
-def findem(n, seen=None, depth=3):
+def findem(asin, seen=None, depth=3):
     depth -= 1
     if depth > 0:
         if seen is None:
             seen = set()
-        found = set(api) - seen
-        print(found, seen)
-        seen |= found
+        found = [item for asin, item in {item.ASIN: item for item in api.similarity_lookup(asin, ResponseGroup='Large').Items.Item if item.ASIN.text not in seen}.iteritems()]
+        trade_eligible_found = [item for item in found if trade_eligible(item) is not None]
+        seen.update([item.ASIN.text for item in trade_eligible_found])
         for item in found:
+            write('{}{}'.format('\t' * depth, asin), log_file)
             yield item
-            for nitem in findem(item, seen, depth):
+            for nitem in findem(item.ASIN.text, seen, depth):
                 yield nitem
 
 
@@ -73,46 +74,48 @@ def trade_eligible(item):
 def check_profit(items):
     global profit_count
     for item in items:
-        if hasattr(item, 'ItemAttributes.TradeInValue'):
+        if hasattr(item.ItemAttributes, 'TradeInValue'):
             try:
                 trade_value = item.ItemAttributes.TradeInValue.Amount / 100.0
             except:
                 trade_value = 0
-        else:
-            trade_value = 0
 
-        if hasattr(item, 'OfferSummary.LowestUsedPrice'):
-            try:
-                lowest_used_price = item.OfferSummary.LowestUsedPrice.Amount / 100.0
-            except:
+            if hasattr(item.OfferSummary, 'LowestUsedPrice'):
+                try:
+                    lowest_used_price = item.OfferSummary.LowestUsedPrice.Amount / 100.0
+                except:
+                    lowest_used_price = 999
+            else:
                 lowest_used_price = 999
-        else:
-            lowest_used_price = 999
 
-        if hasattr(item, 'OfferSummary.LowestNewPrice'):
-            try:
-                lowest_new_price = item.OfferSummary.LowestNewPrice.Amount / 100.0
-            except:
+            if hasattr(item.OfferSummary, 'LowestNewPrice'):
+                try:
+                    lowest_new_price = item.OfferSummary.LowestNewPrice.Amount / 100.0
+                except:
+                    lowest_new_price = 999
+            else:
                 lowest_new_price = 999
-        else:
-            lowest_new_price = 999
 
-        if hasattr(item, 'DetailPageURL'):
-            try:
-                url = item.DetailPageURL
-            except:
+            if hasattr(item, 'DetailPageURL'):
+                try:
+                    url = item.DetailPageURL
+                except:
+                    url = ''
+            else:
                 url = ''
+
+            price = min(lowest_used_price, lowest_new_price)
+            profit = (trade_value - price) - 3.99
+            roi = round(float(profit / price * 100), 2)
+            print '{}\n\tPrice: {}\n\tProfit: {}\n\tROI: {}'.format(item.ASIN, price, profit, roi)
+            write(fname=log_file, text='\tPrice: {}\n\tProfit: {}\n\tROI: {}'.format(price, profit, roi))
+
+            if profit > 5:
+                profit_count += 1
+                print '\tProfit of {} found - {}'.format(profit, item.ASIN)
+                write('{0}, {1}, {2}, {3}, {4}\n'.format(item.ASIN, price, profit, roi, url), fname=profitable_file)
         else:
-            url = ''
-
-        price = min(lowest_used_price, lowest_new_price)
-        profit = (trade_value - price) - 3.99
-        roi = round(float(profit / price * 100), 2)
-
-        if profit > 5:
-            profit_count += 1
-            print '\tProfit of {} found - {}'.format(profit, item.ASIN)
-            write('{0}, {1}, {2}, {3}, {4}\n'.format(item.ASIN, price, profit, roi, url), fname=profitable_file)
+            continue
 
 
 def main(asin_key, max_depth):
@@ -124,9 +127,10 @@ def main(asin_key, max_depth):
     for row in asin_csv:
         asin = row[0]
         write('{}{}'.format('\t' * depth, asin), log_file)
-        next_asin_set = get_similar_items(asin, max_depth)
+        next_asin_set = findem(asin)
         check_profit(next_asin_set)
-
+        # next_asin_set = get_similar_items(asin, max_depth)
+        # check_profit(next_asin_set)
 
 if __name__ == '__main__':
 
