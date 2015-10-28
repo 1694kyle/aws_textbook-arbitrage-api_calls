@@ -35,7 +35,7 @@ def get_similar_items(asin, depth = 3):
     # pull all items similar to item from api
     try:
         similar_items = api.similarity_lookup(asin)
-    except AWSError:
+    except:
         return []
 
     # iterate over each new similar item
