@@ -25,6 +25,7 @@ def write(text, fname):
 
 
 def recursive_amzn(asin,  depth=3): #seen=None,
+    global count, seen
     depth -= 1
     if depth > 0:
         # if seen is None:
@@ -37,16 +38,19 @@ def recursive_amzn(asin,  depth=3): #seen=None,
             except:
                 response = None
         if response is not None:
-            found = [item for asin, item in {item.ASIN: item for item in response.Items.Item if item.ASIN.text not in seen}.iteritems()]
+            found = [item for asin, item in {item.ASIN.text: item for item in response.Items.Item if item.ASIN.text not in seen}.iteritems()]
             trade_eligible_found = [item for item in found if trade_eligible(item) is not None]
-            # seen.update([item.ASIN.text for item in trade_eligible_found])
             for item in trade_eligible_found:
-                write('{}{}'.format('\t' * depth, asin), log_file)
+                seen[item.ASIN.text] = item  # todo: how to store all these seen items efficiently?
+
+            for item in trade_eligible_found:
+                write('{}{} - {}'.format('\t' * depth, count, asin), log_file)
                 yield item
                 for nitem in recursive_amzn(item.ASIN.text, depth):  # seen,
                     yield nitem
         else:
             yield []
+
 
 def trade_eligible(item):
     if hasattr(item.ItemAttributes, 'IsEligibleForTradeIn'):
@@ -56,8 +60,9 @@ def trade_eligible(item):
 
 
 def check_profit(items):
-    global profit_count
+    global profit_count, count
     for item in items:
+        count += 1
         if item.ASIN in seen:
             continue
         else:
@@ -96,11 +101,11 @@ def check_profit(items):
             profit = (trade_value - price) - 3.99
             roi = round(float(profit / price * 100), 2)
             # print '{}\n\tPrice: {}\n\tProfit: {}\n\tROI: {}'.format(item.ASIN, price, profit, roi)
-            write(fname=log_file, text='\tPrice: {}\n\tProfit: {}\n\tROI: {}'.format(price, profit, roi))
+            # write(fname=log_file, text='\tPrice: {}\n\tProfit: {}\n\tROI: {}'.format(price, profit, roi))
 
             if profit > 5:
                 profit_count += 1
-                print 'Profit of {} found - {}'.format(profit, item.ASIN)
+                print '{} - Profit of {} found - {}'.format(count, profit, item.ASIN)
                 write('{0}, {1}, {2}, {3}, {4}\n'.format(item.ASIN, price, profit, roi, url), fname=profitable_file)
         else:
             continue
@@ -114,8 +119,9 @@ def main(asin_key, max_depth):
     asin_csv.next()  # skip header row
     asin_csv = sorted(asin_csv, key=operator.itemgetter(1), reverse=True)  # sort on trade eligible books
     for row in asin_csv:
+        count += 1
         asin = row[0]
-        write('{}{}'.format('\t' * depth, asin), log_file)
+        write('{}{} - {}'.format('\t' * depth, count, asin), log_file)
         next_asin_set = recursive_amzn(asin, depth=max_depth)
         check_profit(next_asin_set)
 
@@ -139,7 +145,7 @@ if __name__ == '__main__':
     # misc variables
     count = 0
     profit_count = 0
-    seen = set()
+    seen = {}
     date = datetime.today().date()
     items = []
     depth = 3
