@@ -49,7 +49,7 @@ def recursive_amzn(asin,  depth=3): #seen=None,
                 for nitem in recursive_amzn(item.ASIN.text, depth):  # seen,
                     yield nitem
         else:
-            yield []
+            yield None
 
 
 def trade_eligible(item):
@@ -62,6 +62,8 @@ def trade_eligible(item):
 def check_profit(items):
     global profit_count, count
     for item in items:
+        if item is None:
+            continue
         count += 1
         if item.ASIN in seen:
             continue
