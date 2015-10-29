@@ -25,7 +25,9 @@ def write(text, fname):
 
 
 def recursive_amzn(asin, depth=3):
+    global tab_depth
     depth -= 1
+    tab_depth = depth
     if depth > 0:
         try:
             response = api.similarity_lookup(asin, ResponseGroup='Large')
@@ -53,7 +55,7 @@ def trade_eligible(item):
 
 
 def check_profit(items):
-    global profit_count, count
+    global profit_count, count, tab_depth, max_depth
     for item in items:
         if item is None:
             continue
@@ -62,7 +64,7 @@ def check_profit(items):
         else:
             count += 1
             seen[item.ASIN] = item
-            write('{}{} - {}'.format('\t', count, item.ASIN), log_file)
+            write('{}{} - {}'.format('\t' * (max_depth - tab_depth), count, item.ASIN), log_file)
 
         if hasattr(item.ItemAttributes, 'TradeInValue'):
             try:
@@ -150,7 +152,7 @@ if __name__ == '__main__':
     date = datetime.today().date()
     items = []
     max_depth = 3
-    depth = max_depth
+    tab_depth = 1
     api_cols = ['trade_value', 'price', 'profit', 'roi', 'url']
 
     # set up output location
