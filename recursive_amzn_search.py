@@ -24,7 +24,7 @@ def write(text, fname):
         f.write('\n')
 
 
-def findem(asin, seen=None, depth=3):
+def recursive_amzn(asin,  depth=3): #seen=None,
     depth -= 1
     if depth > 0:
         # if seen is None:
@@ -32,16 +32,21 @@ def findem(asin, seen=None, depth=3):
         try:
             response = api.similarity_lookup(asin, ResponseGroup='Large')
         except:
-            response = api.item_lookup(asin, ResponseGroup='Large')
-        found = [item for asin, item in {item.ASIN: item for item in response.Items.Item if item.ASIN.text not in seen}.iteritems()]
-        trade_eligible_found = [item for item in found if trade_eligible(item) is not None]
-        # seen.update([item.ASIN.text for item in trade_eligible_found])
-        for item in found:
-            write('{}{}'.format('\t' * depth, asin), log_file)
-            yield item
-            for nitem in findem(item.ASIN.text, seen, depth):
-                yield nitem
-
+            try:
+                response = api.item_lookup(asin, ResponseGroup='Large')
+            except:
+                response = None
+        if response is not None:
+            found = [item for asin, item in {item.ASIN: item for item in response.Items.Item if item.ASIN.text not in seen}.iteritems()]
+            trade_eligible_found = [item for item in found if trade_eligible(item) is not None]
+            # seen.update([item.ASIN.text for item in trade_eligible_found])
+            for item in trade_eligible_found:
+                write('{}{}'.format('\t' * depth, asin), log_file)
+                yield item
+                for nitem in recursive_amzn(item.ASIN.text, depth):  # seen,
+                    yield nitem
+        else:
+            yield []
 
 def trade_eligible(item):
     if hasattr(item.ItemAttributes, 'IsEligibleForTradeIn'):
@@ -103,14 +108,15 @@ def check_profit(items):
 
 def main(asin_key, max_depth):
     global count, items
+    # create download url for key file
     response = urllib2.urlopen(asin_key.generate_url(5))
     asin_csv = csv.reader(response)
-    asin_csv.next()
-    asin_csv = sorted(asin_csv, key=operator.itemgetter(1), reverse=True)
+    asin_csv.next()  # skip header row
+    asin_csv = sorted(asin_csv, key=operator.itemgetter(1), reverse=True)  # sort on trade eligible books
     for row in asin_csv:
         asin = row[0]
         write('{}{}'.format('\t' * depth, asin), log_file)
-        next_asin_set = findem(asin, depth=max_depth)
+        next_asin_set = recursive_amzn(asin, depth=max_depth)
         check_profit(next_asin_set)
 
 if __name__ == '__main__':
