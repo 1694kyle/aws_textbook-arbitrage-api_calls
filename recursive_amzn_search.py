@@ -24,13 +24,9 @@ def write(text, fname):
         f.write('\n')
 
 
-def recursive_amzn(asin,  max_depth=3): #seen=None,
-    global depth
-    depth = max_depth
+def recursive_amzn(asin, depth=3):
     depth -= 1
     if depth > 0:
-        # if seen is None:
-        #     seen = set()
         try:
             response = api.similarity_lookup(asin, ResponseGroup='Large')
         except:
@@ -41,13 +37,9 @@ def recursive_amzn(asin,  max_depth=3): #seen=None,
         if response is not None:
             found = [item for asin, item in {item.ASIN.text: item for item in response.Items.Item if item.ASIN.text not in seen}.iteritems()]
             trade_eligible_found = [item for item in found if trade_eligible(item) is not None]
-            # for item in trade_eligible_found:
-                # seen[item.ASIN.text] = item  # todo: how to store all these seen items efficiently?
-
             for item in trade_eligible_found:
-                # write('{}{} - {}'.format('\t' * depth, count, asin), log_file)
                 yield item
-                for nitem in recursive_amzn(item.ASIN.text, depth):  # seen,
+                for nitem in recursive_amzn(item.ASIN.text, depth):
                     yield nitem
         else:
             yield None
@@ -61,7 +53,7 @@ def trade_eligible(item):
 
 
 def check_profit(items):
-    global profit_count, count, depth
+    global profit_count, count
     for item in items:
         if item is None:
             continue
@@ -70,7 +62,7 @@ def check_profit(items):
         else:
             count += 1
             seen[item.ASIN] = item
-            write('{}{} - {}'.format('\t' * depth, count, item.ASIN), log_file)
+            write('{}{} - {}'.format('\t', count, item.ASIN), log_file)
 
         if hasattr(item.ItemAttributes, 'TradeInValue'):
             try:
@@ -126,8 +118,8 @@ def main(asin_key, max_depth):
     for row in asin_csv:
         count += 1
         asin = row[0]
-        write('{}{} - {}'.format('\t' * depth, count, asin), log_file)
-        next_asin_set = recursive_amzn(asin, max_depth=max_depth)
+        write('{} - {}'.format(count, asin), log_file)
+        next_asin_set = recursive_amzn(asin, depth=max_depth)
         try:
             check_profit(next_asin_set)
         except Exception as e:
