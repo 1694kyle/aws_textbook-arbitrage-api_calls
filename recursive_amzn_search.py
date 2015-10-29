@@ -25,7 +25,7 @@ def write(text, fname):
 
 
 def recursive_amzn(asin,  max_depth=3): #seen=None,
-    global count, seen, depth
+    global depth
     depth = max_depth
     depth -= 1
     if depth > 0:
@@ -65,13 +65,12 @@ def check_profit(items):
     for item in items:
         if item is None:
             continue
-        count += 1
         if item.ASIN in seen:
             continue
         else:
+            count += 1
             seen[item.ASIN] = item
-
-        write('{}{} - {}'.format('\t' * depth, count, item.ASIN), log_file)
+            write('{}{} - {}'.format('\t' * depth, count, item.ASIN), log_file)
 
         if hasattr(item.ItemAttributes, 'TradeInValue'):
             try:
