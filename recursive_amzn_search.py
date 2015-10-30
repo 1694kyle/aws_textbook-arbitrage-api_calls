@@ -119,15 +119,6 @@ def seendb(asin):
     return False
 
 
-def seen(asin):
-    with open('seen.csv', 'rb+') as f:
-        for line in f:
-            if asin in line.strip():
-                return True
-        f.write('{}\n'.format(asin))
-    return False
-
-
 def main(asin_key, max_depth):
     global count, items
     # create download url for key file
@@ -164,12 +155,10 @@ if __name__ == '__main__':
     api = API(locale='us')
 
     # seen db
-    sql = sqlite3.connect('asin.db')
+    dup_db = 'dup - {}.db'.format(date)
+    sql = sqlite3.connect(dup_db)
     cur = sql.cursor()
     cur.execute('CREATE TABLE IF NOT EXISTS seen(id TEXT)')
-
-    # reset seen.csv
-    open('seen.csv', 'wb').close()
 
     # misc variables
     count = 0
@@ -208,7 +197,8 @@ if __name__ == '__main__':
     print '**** SCRIPT EXECUTION TIME - {} HRS ****'.format(round((end - start)/3600, 2))
     print '**** {} PROFITABLE BOOKS IDENTIFIED ****'.format(profit_count)
     # closeout
-    os.remove('asin.db')  # delete db
+    if os.path.isfile(dup_db):
+        os.remove(dup_db)  # delete duplicate db
     if profit_count > 0:  # send email if profitable items
         send_mail_via_smtp(profitable_file)
 

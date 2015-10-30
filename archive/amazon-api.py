@@ -34,7 +34,7 @@ def upload_frame(frame, type):
             return None
         k.key = '/api_results/results-{}'.format(search_date)
         k.set_contents_from_string(frame.to_csv(index=False))
-        send_mail_via_smtp()
+        send_mail_via_smtp(pro)
         os.remove('results.csv')
     else:
         k.key = '/scraping_items/items-{}'.format(search_date)
