@@ -9,7 +9,7 @@ import boto
 import csv
 import urllib2
 import operator
-
+import time
 
 def item_keys(keys):
     regex = re.compile(r'scraping_items\/items-(.+)\.csv')
@@ -169,11 +169,13 @@ if __name__ == '__main__':
     open(profitable_file, 'wb').close()
 
     # execution
-    start = datetime.now().time()
+    start = time.time()
     print '**** SCRIPT STARTED AT {} ****'.format(start)
     main(latest_items_key, max_depth)
-    end = datetime.now().time()
+    end = time.time()
     print '**** SCRIPT ENDED AT {} ****'.format(end)
+    print '**** SCRIPT EXECUTION TIME - {} HRS ****'.format(round((end - start)/3600, 2))
+    print '**** {} PROFITABLE BOOKS IDENTIFIED ****'.format(profit_count)
     # closeout
     if profit_count > 0:
         send_mail_via_smtp(profitable_file)
