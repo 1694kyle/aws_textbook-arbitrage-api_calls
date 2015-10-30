@@ -129,7 +129,6 @@ def main(asin_key, max_depth):
             continue
 
 if __name__ == '__main__':
-
     # boto connection
     conn = boto.connect_s3(os.environ['AWS_ACCESS_KEY'], os.environ['AWS_SECRET_KEY'])
     bucket = conn.get_bucket('textbook-arbitrage')
@@ -170,8 +169,11 @@ if __name__ == '__main__':
     open(profitable_file, 'wb').close()
 
     # execution
+    start = datetime.now().time()
+    print '**** SCRIPT STARTED AT {} ****'.format(start)
     main(latest_items_key, max_depth)
-
+    end = datetime.now().time()
+    print '**** SCRIPT ENDED AT {} ****'.format(end)
     # closeout
     if profit_count > 0:
         send_mail_via_smtp(profitable_file)
