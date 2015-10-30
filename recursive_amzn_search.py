@@ -168,7 +168,6 @@ if __name__ == '__main__':
     items = []
     max_depth = 3
     tab_depth = 1
-    api_cols = ['trade_value', 'price', 'profit', 'roi', 'url']
 
     # set up output location
     LOCAL_OUTPUT_DIR = os.path.join(os.environ.get('HOME'), 'Desktop', 'Recursive Search Results')
