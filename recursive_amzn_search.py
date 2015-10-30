@@ -37,8 +37,8 @@ def recursive_amzn(asin, depth=3):
             except:
                 response = None
         if response is not None:
-            found = [item for asin, item in {item.ASIN.text: item for item in response.Items.Item if item.ASIN.text not in seen}.iteritems()]
-            trade_eligible_found = [item for item in found if trade_eligible(item) is not None]
+            found = [item for item in response.Items.Item if not seen(item.ASIN.text)] #{item.ASIN.text: item for item in response.Items.Item if not seen(item.ASIN.text)}.iteritems()]
+            trade_eligible_found = [item for item in found if trade_eligible(item)]
             for item in trade_eligible_found:
                 yield item
                 for nitem in recursive_amzn(item.ASIN.text, depth):
@@ -49,9 +49,9 @@ def recursive_amzn(asin, depth=3):
 
 def trade_eligible(item):
     if hasattr(item.ItemAttributes, 'IsEligibleForTradeIn'):
-        return item
+        return True
     else:
-        return None
+        return False
 
 
 def check_profit(items):
@@ -59,13 +59,12 @@ def check_profit(items):
     for item in items:
         if item is None:
             continue
-        if item.ASIN in seen:
-            continue
-        else:
-            count += 1
-            seen[item.ASIN] = item
-            write('{}{} - {}'.format('\t' * (max_depth - tab_depth), count, item.ASIN), log_file)
-
+        # if item.ASIN in seen:
+        #     continue
+        # else:
+        #     seen[item.ASIN] = item
+        write('{}{} - {}'.format('\t' * (max_depth - tab_depth), count, item.ASIN), log_file)
+        count += 1
         if hasattr(item.ItemAttributes, 'TradeInValue'):
             try:
                 trade_value = item.ItemAttributes.TradeInValue.Amount / 100.0
@@ -110,6 +109,16 @@ def check_profit(items):
             continue
 
 
+def seen(asin):
+    with open('seen.csv', 'rb') as f:
+        for line in f:
+            if asin in line.strip():
+                return True
+
+    with open('seen.csv', 'a') as f:
+        f.write('{}\n'.format(asin))
+    return False
+
 def main(asin_key, max_depth):
     global count, items
     # create download url for key file
@@ -122,11 +131,12 @@ def main(asin_key, max_depth):
         asin = row[0]
         write('{} - {}'.format(count, asin), log_file)
         next_asin_set = recursive_amzn(asin, depth=max_depth)
-        try:
-            check_profit(next_asin_set)
-        except Exception as e:
-            print e
-            continue
+
+        # try:
+        check_profit(next_asin_set)
+        # except Exception as e:
+        #     print e
+        #     continue
 
 if __name__ == '__main__':
     # boto connection
@@ -144,10 +154,13 @@ if __name__ == '__main__':
     # set up api
     api = API(locale='us')
 
+    # reset seen.csv
+    open('seen.csv', 'wb').close()
+
     # misc variables
     count = 0
     profit_count = 0
-    seen = {}
+    # seen = {}
     date = datetime.today().date()
     items = []
     max_depth = 3
