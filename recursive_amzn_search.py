@@ -10,6 +10,8 @@ import csv
 import urllib2
 import operator
 import time
+import sqlite3
+
 
 def item_keys(keys):
     regex = re.compile(r'scraping_items\/items-(.+)\.csv')
@@ -37,7 +39,7 @@ def recursive_amzn(asin, depth=3):
             except:
                 response = None
         if response is not None:
-            found = [item for item in response.Items.Item if not seen(item.ASIN.text)] #{item.ASIN.text: item for item in response.Items.Item if not seen(item.ASIN.text)}.iteritems()]
+            found = [item for item in response.Items.Item if not seendb(item.ASIN.text)] #{item.ASIN.text: item for item in response.Items.Item if not seen(item.ASIN.text)}.iteritems()]
             trade_eligible_found = [item for item in found if trade_eligible(item)]
             for item in trade_eligible_found:
                 yield item
@@ -59,10 +61,6 @@ def check_profit(items):
     for item in items:
         if item is None:
             continue
-        # if item.ASIN in seen:
-        #     continue
-        # else:
-        #     seen[item.ASIN] = item
         write('{}{} - {}'.format('\t' * (max_depth - tab_depth), count, item.ASIN), log_file)
         count += 1
         if hasattr(item.ItemAttributes, 'TradeInValue'):
@@ -109,15 +107,26 @@ def check_profit(items):
             continue
 
 
+def seendb(asin):
+    cur.execute('SELECT * FROM seen WHERE ID=?', [asin])
+    if cur.fetchone():
+        # Post is already in the database
+        return True
+
+    cur.execute('INSERT INTO seen VALUES(?)', [asin])
+    sql.commit()
+
+    return False
+
+
 def seen(asin):
-    with open('seen.csv', 'rb') as f:
+    with open('seen.csv', 'rb+') as f:
         for line in f:
             if asin in line.strip():
                 return True
-
-    with open('seen.csv', 'a') as f:
         f.write('{}\n'.format(asin))
     return False
+
 
 def main(asin_key, max_depth):
     global count, items
@@ -154,6 +163,11 @@ if __name__ == '__main__':
     # set up api
     api = API(locale='us')
 
+    # seen db
+    sql = sqlite3.connect('asin.db')
+    cur = sql.cursor()
+    cur.execute('CREATE TABLE IF NOT EXISTS seen(id TEXT)')
+
     # reset seen.csv
     open('seen.csv', 'wb').close()
 
@@ -184,12 +198,17 @@ if __name__ == '__main__':
     # execution
     start = time.time()
     print '**** SCRIPT STARTED AT {} ****'.format(start)
-    main(latest_items_key, max_depth)
+    try:
+        main(latest_items_key, max_depth)
+    except Exception as e:
+        print '****ERROR IN MAIN EXECUTION****'
+        print e
     end = time.time()
     print '**** SCRIPT ENDED AT {} ****'.format(end)
     print '**** SCRIPT EXECUTION TIME - {} HRS ****'.format(round((end - start)/3600, 2))
     print '**** {} PROFITABLE BOOKS IDENTIFIED ****'.format(profit_count)
     # closeout
-    if profit_count > 0:
+    os.remove('asin.db')  # delete db
+    if profit_count > 0:  # send email if profitable items
         send_mail_via_smtp(profitable_file)
 
