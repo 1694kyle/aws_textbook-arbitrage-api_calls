@@ -39,7 +39,7 @@ def recursive_amzn(asin, depth=3):
             except:
                 response = None
         if response is not None:
-            found = [item for item in response.Items.Item if not seendb(item.ASIN.text)] #{item.ASIN.text: item for item in response.Items.Item if not seen(item.ASIN.text)}.iteritems()]
+            found = [item for item in response.Items.Item if not seendb(item.ASIN.text)]
             trade_eligible_found = [item for item in found if trade_eligible(item)]
             for item in trade_eligible_found:
                 yield item
@@ -132,11 +132,11 @@ def main(asin_key, max_depth):
         write('{} - {}'.format(count, asin), log_file)
         next_asin_set = recursive_amzn(asin, depth=max_depth)
 
-        # try:
-        check_profit(next_asin_set)
-        # except Exception as e:
-        #     print e
-        #     continue
+        try:
+            check_profit(next_asin_set)
+        except Exception as e:
+            print e
+            continue
 
 if __name__ == '__main__':
     # boto connection
@@ -163,7 +163,6 @@ if __name__ == '__main__':
     # misc variables
     count = 0
     profit_count = 0
-    # seen = {}
     date = datetime.today().date()
     items = []
     max_depth = 3
@@ -192,6 +191,7 @@ if __name__ == '__main__':
         print '****ERROR IN MAIN EXECUTION****'
         print e
     end = time.time()
+    print '*' * 15
     print '**** SCRIPT ENDED AT {} ****'.format(end)
     print '**** SCRIPT EXECUTION TIME - {} HRS ****'.format(round((end - start)/3600, 2))
     print '**** {} PROFITABLE BOOKS IDENTIFIED ****'.format(profit_count)
