@@ -6,6 +6,7 @@ from email.mime.text import MIMEText
 import smtplib
 from datetime import datetime
 
+
 def send_mail_via_smtp(attachment):
     date = datetime.today().date()
     username = os.environ['YAHOO_USERNAME'] + '@yahoo.com'
@@ -13,7 +14,8 @@ def send_mail_via_smtp(attachment):
 
     recipients_emails = 'kylebonnet@gmail.com'
 
-    body = 'GET SOME'
+    body = 'GET SOME\n\nTextbook Arbitrage Results - {}'.format(date)
+
 
     msg = MIMEMultipart(
         From=username,
@@ -26,7 +28,7 @@ def send_mail_via_smtp(attachment):
     msg.attach(MIMEApplication(
         open(attachment).read(),
         Content_Disposition='attachment; filename=results - {}'.format(date),
-        Name='profitable - {}'.format(date)
+        Name='profitable - {}.csv'.format(date)
     ))
 
     try:
