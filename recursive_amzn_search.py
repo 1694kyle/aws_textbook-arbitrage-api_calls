@@ -203,4 +203,6 @@ if __name__ == '__main__':
         os.remove(dup_db)  # delete duplicate db
     if profit_count > 0:  # send email if profitable items
         send_mail_via_smtp(profitable_file)
+    else:
+        os.remove(profitable_file)
 
