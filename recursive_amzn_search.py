@@ -20,10 +20,11 @@ def item_keys(keys):
     return latest_key
 
 
-def write(text, fname):
+def write(text, fname, profit=False):
     with open(fname, 'a') as f:
         f.write(text)
-        f.write('\n')
+        if not profit:
+            f.write('\n')
 
 
 def recursive_amzn(asin, depth=3):
@@ -102,7 +103,7 @@ def check_profit(items):
             if profit > 5:
                 profit_count += 1
                 print '{} - Profit of {} found - {}'.format(count, profit, item.ASIN)
-                write('{0}, {1}, {2}, {3}, {4}\n'.format(item.ASIN, price, profit, roi, url), fname=profitable_file)
+                write('{0}, {1}, {2}, {3}, {4}\n'.format(item.ASIN, price, profit, roi, url), fname=profitable_file, profit=True)
         else:
             continue
 
@@ -195,6 +196,7 @@ if __name__ == '__main__':
     print '**** SCRIPT ENDED AT {} ****'.format(end)
     print '**** SCRIPT EXECUTION TIME - {} HRS ****'.format(round((end - start)/3600, 2))
     print '**** {} PROFITABLE BOOKS IDENTIFIED ****'.format(profit_count)
+
     # closeout
     if os.path.isfile(dup_db):
         os.remove(dup_db)  # delete duplicate db
