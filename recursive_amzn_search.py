@@ -181,7 +181,8 @@ if __name__ == '__main__':
 
     open(item_file, 'wb').close()
     open(log_file, 'wb').close()
-    open(profitable_file, 'wb').close()
+    with open(profitable_file, 'wb') as f:
+        f.write('{}, {}, {}, {}, {}\n'.format('asin', 'price', 'profit', 'roi', 'url'))
 
     # execution
     start = time.time()
