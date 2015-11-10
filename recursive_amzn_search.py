@@ -155,11 +155,7 @@ if __name__ == '__main__':
     # set up api
     api = API(locale='us')
 
-    # seen db
-    dup_db = 'dup - {}.db'.format(date)
-    sql = sqlite3.connect(dup_db)
-    cur = sql.cursor()
-    cur.execute('CREATE TABLE IF NOT EXISTS seen(id TEXT)')
+
 
     # misc variables
     count = 0
@@ -183,6 +179,12 @@ if __name__ == '__main__':
     open(log_file, 'wb').close()
     with open(profitable_file, 'wb') as f:
         f.write('{}, {}, {}, {}, {}\n'.format('asin', 'price', 'profit', 'roi', 'url'))
+
+        # seen db
+    dup_db = os.path.join(LOCAL_OUTPUT_DIR, 'Items', 'dup - {}.db'.format(date))
+    sql = sqlite3.connect(dup_db)
+    cur = sql.cursor()
+    cur.execute('CREATE TABLE IF NOT EXISTS seen(id TEXT)')
 
     # execution
     start = time.time()
