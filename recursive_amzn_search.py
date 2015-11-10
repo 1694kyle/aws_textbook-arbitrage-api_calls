@@ -167,7 +167,6 @@ if __name__ == '__main__':
 
     # set up output location
     LOCAL_OUTPUT_DIR = os.path.join(os.environ.get('HOME'), 'Desktop', 'Recursive Search Results')
-    item_file = os.path.join(LOCAL_OUTPUT_DIR, 'Items', 'items - {}.csv'.format(date))
     log_file = os.path.join(LOCAL_OUTPUT_DIR, 'Logs', 'log - {}.csv'.format(date))
     profitable_file = os.path.join(LOCAL_OUTPUT_DIR, 'Profitable', 'profitable - {}.csv'.format(date))
 
@@ -175,12 +174,11 @@ if __name__ == '__main__':
     if not os.path.isdir(os.path.join(LOCAL_OUTPUT_DIR, 'Logs')): os.makedirs(os.path.join(LOCAL_OUTPUT_DIR, 'Logs'))
     if not os.path.isdir(os.path.join(LOCAL_OUTPUT_DIR, 'Profitable')): os.makedirs(os.path.join(LOCAL_OUTPUT_DIR, 'Profitable'))
 
-    open(item_file, 'wb').close()
     open(log_file, 'wb').close()
     with open(profitable_file, 'wb') as f:
         f.write('{}, {}, {}, {}, {}\n'.format('asin', 'price', 'profit', 'roi', 'url'))
 
-        # seen db
+    # seen db
     dup_db = os.path.join(LOCAL_OUTPUT_DIR, 'Items', 'dup - {}.db'.format(date))
     sql = sqlite3.connect(dup_db)
     cur = sql.cursor()
@@ -188,7 +186,7 @@ if __name__ == '__main__':
 
     # execution
     start = time.time()
-    print '**** SCRIPT STARTED AT {} ****'.format(start)
+    print '**** SCRIPT STARTED AT {} ****'.format(time.ctime(int(time.time())))
     try:
         main(latest_items_key, max_depth)
     except Exception as e:
@@ -196,7 +194,7 @@ if __name__ == '__main__':
         print e
     end = time.time()
     print '*' * 15
-    print '**** SCRIPT ENDED AT {} ****'.format(end)
+    print '**** SCRIPT ENDED AT {} ****'.format(time.ctime(int(time.time())))
     print '**** SCRIPT EXECUTION TIME - {} HRS ****'.format(round((end - start)/3600, 2))
     print '**** {} PROFITABLE BOOKS IDENTIFIED ****'.format(profit_count)
 
