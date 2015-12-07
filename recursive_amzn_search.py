@@ -139,6 +139,7 @@ def main(asin_key, max_depth):
             print e
             continue
 
+
 if __name__ == '__main__':
     # boto connection
     conn = boto.connect_s3(os.environ['AWS_ACCESS_KEY'], os.environ['AWS_SECRET_KEY'])
@@ -154,8 +155,6 @@ if __name__ == '__main__':
 
     # set up api
     api = API(locale='us')
-
-
 
     # misc variables
     count = 0
@@ -199,6 +198,7 @@ if __name__ == '__main__':
     print '**** {} PROFITABLE BOOKS IDENTIFIED ****'.format(profit_count)
 
     # closeout
+    cur.close()
     if os.path.isfile(dup_db):
         os.remove(dup_db)  # delete duplicate db
     if profit_count > 0:  # send email if profitable items
