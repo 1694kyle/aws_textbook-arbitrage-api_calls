@@ -11,7 +11,7 @@ import urllib2
 import operator
 import time
 import sqlite3
-
+import glob
 
 def item_keys(keys):
     regex = re.compile(r'scraping_items\/items-(.+)\.csv')
@@ -178,7 +178,9 @@ if __name__ == '__main__':
         f.write('{}, {}, {}, {}, {}\n'.format('asin', 'price', 'profit', 'roi', 'url'))
 
     # seen db
-    dup_db = os.path.join(LOCAL_OUTPUT_DIR, 'Items', 'dup - {}.db'.format(date))
+    db_dir = os.path.join(LOCAL_OUTPUT_DIR, 'Items')
+    os.remove(max(glob.glob(os.path.join(db_dir, '*.db')), key=os.path.getmtime))
+    dup_db = os.path.join(db_dir, 'dup - {}.db'.format(date))
     sql = sqlite3.connect(dup_db)
     cur = sql.cursor()
     cur.execute('CREATE TABLE IF NOT EXISTS seen(id TEXT)')
@@ -199,8 +201,6 @@ if __name__ == '__main__':
 
     # closeout
     cur.close()
-    # if os.path.isfile(dup_db):
-    #     os.remove(dup_db)  # delete duplicate db
     if profit_count > 0:  # send email if profitable items
         send_mail_via_smtp(profitable_file)
     else:
