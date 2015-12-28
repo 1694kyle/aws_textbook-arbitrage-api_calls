@@ -3,7 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="cdee3a1e-30fe-477b-af5a-dad4a1e4c525" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/recursive_amzn_search.py" afterPath="$PROJECT_DIR$/recursive_amzn_search.py" />
     </list>
     <ignored path="amazon-api.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -39,7 +38,7 @@
       <file leaf-file-name="recursive_amzn_search.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/recursive_amzn_search.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.45350733">
+            <state vertical-scroll-proportion="-0.07667211">
               <caret line="184" column="22" selection-start-line="184" selection-start-column="22" selection-end-line="184" selection-end-column="22" />
               <folding>
                 <element signature="e#0#33#0" expanded="true" />
@@ -168,7 +167,7 @@
       <recent name="C:\Users\kbonnet\PycharmProjects\AWS\Projects\amazon-api\output" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.del (1)">
+  <component name="RunManager" selected="Python.recursive_amzn_search">
     <configuration default="false" name="test" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -385,8 +384,8 @@
     </list>
     <recent_temporary>
       <list size="5">
-        <item index="0" class="java.lang.String" itemvalue="Python.del (1)" />
-        <item index="1" class="java.lang.String" itemvalue="Python.recursive_amzn_search" />
+        <item index="0" class="java.lang.String" itemvalue="Python.recursive_amzn_search" />
+        <item index="1" class="java.lang.String" itemvalue="Python.del (1)" />
         <item index="2" class="java.lang.String" itemvalue="Python.del" />
         <item index="3" class="java.lang.String" itemvalue="Python.del2" />
         <item index="4" class="java.lang.String" itemvalue="Python.test" />
@@ -403,12 +402,6 @@
       <created>1445444780902</created>
       <option name="number" value="Default" />
       <updated>1445444780902</updated>
-    </task>
-    <task id="LOCAL-00028" summary="init">
-      <created>1445871519357</created>
-      <option name="number" value="00028" />
-      <option name="project" value="LOCAL" />
-      <updated>1445871519357</updated>
     </task>
     <task id="LOCAL-00029" summary="init">
       <created>1445871954776</created>
@@ -698,7 +691,13 @@
       <option name="project" value="LOCAL" />
       <updated>1451321138086</updated>
     </task>
-    <option name="localTasksCounter" value="77" />
+    <task id="LOCAL-00077" summary="init">
+      <created>1451322589048</created>
+      <option name="number" value="00077" />
+      <option name="project" value="LOCAL" />
+      <updated>1451322589048</updated>
+    </task>
+    <option name="localTasksCounter" value="78" />
     <servers />
   </component>
   <component name="TodoView" selected-index="4">
@@ -1239,7 +1238,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/recursive_amzn_search.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.45350733">
+        <state vertical-scroll-proportion="-0.07667211">
           <caret line="184" column="22" selection-start-line="184" selection-start-column="22" selection-end-line="184" selection-end-column="22" />
           <folding>
             <element signature="e#0#33#0" expanded="true" />
