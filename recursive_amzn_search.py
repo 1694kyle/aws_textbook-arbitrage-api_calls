@@ -123,7 +123,7 @@ def seendb(asin):
 def main(asin_key, max_depth):
     global count, items
     # create download url for key file
-    response = urllib2.urlopen(asin_key.generate_url(120))
+    response = urllib2.urlopen(asin_key.generate_url(120))  # download url expires in 120 sec
     asin_csv = csv.reader(response)
     asin_csv.next()  # skip header row
     asin_csv = sorted(asin_csv, key=operator.itemgetter(1), reverse=True)  # sort on trade eligible books
@@ -188,11 +188,11 @@ if __name__ == '__main__':
     # execution
     start = time.time()
     print '**** SCRIPT STARTED AT {} ****'.format(time.ctime(int(time.time())))
-    # try:
-    main(latest_items_key, max_depth)
-    # except Exception as e:
-    #     print '****ERROR IN MAIN EXECUTION****'
-    #     print e
+    try:
+        main(latest_items_key, max_depth)
+    except Exception as e:
+        print '****ERROR IN MAIN EXECUTION****'
+        print e
     end = time.time()
     print '*' * 15
     print '**** SCRIPT ENDED AT {} ****'.format(time.ctime(int(time.time())))
