@@ -123,7 +123,7 @@ def seendb(asin):
 def main(asin_key, max_depth):
     global count, items
     # create download url for key file
-    response = urllib2.urlopen(asin_key.generate_url(5))
+    response = urllib2.urlopen(asin_key.generate_url(120))
     asin_csv = csv.reader(response)
     asin_csv.next()  # skip header row
     asin_csv = sorted(asin_csv, key=operator.itemgetter(1), reverse=True)  # sort on trade eligible books
