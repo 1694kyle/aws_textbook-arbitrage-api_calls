@@ -13,7 +13,8 @@ import time
 import sqlite3
 import glob
 
-def item_keys(keys):
+
+def get_latest_key(keys):
     regex = re.compile(r'scraping_items\/items-(.+)\.csv')
     keys = [(key, datetime.strptime(regex.search(key.name).group(1), '%m-%d-%Y')) for key in keys if regex.match(key.name)]
     latest_key = max(keys, key=itemgetter(1))[0]
@@ -95,7 +96,7 @@ def check_profit(items):
                 url = ''
 
             price = min(lowest_used_price, lowest_new_price)
-            profit = (trade_value - price) - 3.99
+            profit = (trade_value - price) - 3.99  # discount profit to include shipping
             roi = round(float(profit / price * 100), 2)
             # print '{}\n\tPrice: {}\n\tProfit: {}\n\tROI: {}'.format(item.ASIN, price, profit, roi)
             # write(fname=log_file, text='\tPrice: {}\n\tProfit: {}\n\tROI: {}'.format(price, profit, roi))
@@ -151,7 +152,7 @@ if __name__ == '__main__':
 
     # get key
     keys = bucket.list()
-    latest_items_key = item_keys(keys)
+    latest_items_key = get_latest_key(keys)
 
     # set up api
     api = API(locale='us')
