@@ -58,7 +58,7 @@ def trade_eligible(item):
 
 
 def check_profit(items):
-    global profit_count, count, tab_depth, max_depth
+    global profit_count, count, tab_depth, max_depth, profit_min, roi_min
     for item in items:
         if item is None:
             continue
@@ -100,7 +100,7 @@ def check_profit(items):
             # print '{}\n\tPrice: {}\n\tProfit: {}\n\tROI: {}'.format(item.ASIN, price, profit, roi)
             # write(fname=log_file, text='\tPrice: {}\n\tProfit: {}\n\tROI: {}'.format(price, profit, roi))
 
-            if profit > 5:
+            if profit >= profit_min and roi >= roi_min:
                 profit_count += 1
                 print '{} - Profit of {} found - {}'.format(count, profit, item.ASIN)
                 write('{0}, {1}, {2}, {3}, {4}\n'.format(item.ASIN, price, profit, roi, url), fname=profitable_file, profit=True)
@@ -157,11 +157,13 @@ if __name__ == '__main__':
     api = API(locale='us')
 
     # misc variables
+    profit_min = 10
+    roi_min = 15
     count = 0
     profit_count = 0
     date = datetime.today().date()
     items = []
-    max_depth = 3
+    max_depth = 3  # set depth to check similar items
     tab_depth = 1
 
     # set up output location
@@ -202,7 +204,8 @@ if __name__ == '__main__':
     # closeout
     cur.close()
     if profit_count > 0:  # send email if profitable items
-        send_mail_via_smtp(profitable_file)
+        pass  # output going to onedrive, so no need for email right now
+        #send_mail_via_smtp(profitable_file)
     else:
         os.remove(profitable_file)
 
