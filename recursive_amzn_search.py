@@ -12,6 +12,7 @@ import operator
 import time
 import sqlite3
 import glob
+import random
 
 
 def get_latest_key(keys):
@@ -140,7 +141,8 @@ def main(asin_key, max_depth):
     response = urllib2.urlopen(asin_key.generate_url(120))  # download url expires in 120 sec
     asin_csv = csv.reader(response)
     asin_csv.next()  # skip header row
-    asin_csv = sorted(asin_csv, key=operator.itemgetter(1), reverse=True)  # sort on trade eligible books
+    asin_csv = sorted(asin_csv, key=operator.itemgetter(1), reverse=True)  # sort on trade eligible books  #todo: how to randomize line selection
+    random.shuffle(asin_csv)
     for row in asin_csv:
         count += 1
         asin = row[0]
@@ -235,6 +237,6 @@ if __name__ == '__main__':
         #send_mail_via_smtp(profitable_file)
     else:
         os.remove(profitable_file)
-
-    write_item_key(item_file)
+    if count > 0:
+        write_item_key(item_file)
 
