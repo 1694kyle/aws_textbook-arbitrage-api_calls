@@ -15,10 +15,22 @@ import glob
 
 
 def get_latest_key(keys):
+    """
+    gets the latest key from s3 bucket "textbook arbitrage"
+    :param keys:
+    :return:
+    """
     regex = re.compile(r'scraping_items\/items-(.+)\.csv')
     keys = [(key, datetime.strptime(regex.search(key.name).group(1), '%m-%d-%Y')) for key in keys if regex.match(key.name)]
     latest_key = max(keys, key=itemgetter(1))[0]
     return latest_key
+
+
+def write_item_key(key_file):
+    path = r'scraping_items/items/'
+    full_key_name = os.path.join(path, os.path.basename(key_file))
+    k = bucket.new_key(full_key_name)
+    k.set_contents_from_filename(key_file)
 
 
 def write(text, fname, profit=False):
@@ -59,12 +71,13 @@ def trade_eligible(item):
 
 
 def check_profit(items):
-    global profit_count, count, tab_depth, max_depth, profit_min, roi_min
+    global profit_count, count, tab_depth, max_depth, profit_min, roi_min, item_file
     for item in items:
         if item is None:
             continue
-        write('{}{} - {}'.format('\t' * (max_depth - tab_depth), count, item.ASIN), log_file)
         count += 1
+        write('{}{} - {}'.format('\t' * (max_depth - tab_depth), count, item.ASIN), log_file)
+        write('{},{}'.format(item.ASIN.text, 'True'), item_file)
         if hasattr(item.ItemAttributes, 'TradeInValue'):
             try:
                 trade_value = item.ItemAttributes.TradeInValue.Amount / 100.0
@@ -130,6 +143,7 @@ def main(asin_key, max_depth):
     asin_csv = sorted(asin_csv, key=operator.itemgetter(1), reverse=True)  # sort on trade eligible books
     for row in asin_csv:
         count += 1
+        if count > 100 : break
         asin = row[0]
         write('{} - {}'.format(count, asin), log_file)
         next_asin_set = recursive_amzn(asin, depth=max_depth)
@@ -171,14 +185,19 @@ if __name__ == '__main__':
     LOCAL_OUTPUT_DIR = os.path.join(os.environ.get('ONEDRIVE_PATH'), 'Recursive Search Results')
     log_file = os.path.join(LOCAL_OUTPUT_DIR, 'Logs', 'log - {}.csv'.format(date))
     profitable_file = os.path.join(LOCAL_OUTPUT_DIR, 'Profitable', 'profitable - {}.csv'.format(date))
+    item_file = os.path.join(LOCAL_OUTPUT_DIR, 'Items', 'items-{}.csv'.format(date))
 
+    # crete out dirs if not there
     if not os.path.isdir(os.path.join(LOCAL_OUTPUT_DIR, 'Items')): os.makedirs(os.path.join(LOCAL_OUTPUT_DIR, 'Items'))
     if not os.path.isdir(os.path.join(LOCAL_OUTPUT_DIR, 'Logs')): os.makedirs(os.path.join(LOCAL_OUTPUT_DIR, 'Logs'))
     if not os.path.isdir(os.path.join(LOCAL_OUTPUT_DIR, 'Profitable')): os.makedirs(os.path.join(LOCAL_OUTPUT_DIR, 'Profitable'))
 
+    # create or overwrite out files
     open(log_file, 'wb').close()
     with open(profitable_file, 'wb') as f:
         f.write('{}, {}, {}, {}, {}\n'.format('asin', 'price', 'profit', 'roi', 'url'))
+    with open(item_file, 'wb') as f:
+        f.write('{},{}/n'.format('isbn10', 'trade_eligible'))
 
     # seen db
     db_dir = os.path.join(LOCAL_OUTPUT_DIR, 'Items')
@@ -209,4 +228,6 @@ if __name__ == '__main__':
         #send_mail_via_smtp(profitable_file)
     else:
         os.remove(profitable_file)
+
+    write_item_key(item_file)
 
