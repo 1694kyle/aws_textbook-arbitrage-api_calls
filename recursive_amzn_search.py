@@ -141,8 +141,7 @@ def main(asin_key, max_depth):
     response = urllib2.urlopen(asin_key.generate_url(120))  # download url expires in 120 sec
     asin_csv = csv.reader(response)
     asin_csv.next()  # skip header row
-    asin_csv = sorted(asin_csv, key=operator.itemgetter(1), reverse=True)  # sort on trade eligible books  #todo: how to randomize line selection
-    random.shuffle(asin_csv)
+    asin_csv = (item for item in sorted(asin_csv, key=lambda k: random.random())[:500000/max_depth])  # create new gen to deliver randomized books up to 500k/max_depth
     for row in asin_csv:
         count += 1
         asin = row[0]
@@ -183,7 +182,8 @@ if __name__ == '__main__':
     tab_depth = 1
 
     # set up output location
-    LOCAL_OUTPUT_DIR = os.path.join(os.environ.get('ONEDRIVE_PATH'), 'Recursive Search Results')
+    LOCAL_OUTPUT_DIR = os.path.join(os.environ.get('HOME'), 'Desktop', 'Recursive Search Results')
+    # LOCAL_OUTPUT_DIR = os.path.join(os.environ.get('ONEDRIVE_PATH'), 'Recursive Search Results')
     log_file = os.path.join(LOCAL_OUTPUT_DIR, 'Logs', 'log - {}.csv'.format(date))
     profitable_file = os.path.join(LOCAL_OUTPUT_DIR, 'Profitable', 'profitable - {}.csv'.format(date))
     item_file = os.path.join(LOCAL_OUTPUT_DIR, 'Items', 'items-{}.csv'.format(date))
@@ -221,6 +221,8 @@ if __name__ == '__main__':
         print '****ERROR IN MAIN EXECUTION****'
         print e
     end = time.time()
+
+
     print '*' * 15
     print '**** SCRIPT ENDED AT {} ****'.format(time.ctime(int(time.time())))
     print '**** SCRIPT EXECUTION TIME - {} hrs ****'.format(round((end - start)/3600, 2))
