@@ -221,9 +221,10 @@ if __name__ == '__main__':
     end = time.time()
     print '*' * 15
     print '**** SCRIPT ENDED AT {} ****'.format(time.ctime(int(time.time())))
-    print '**** SCRIPT EXECUTION TIME - {} HRS ****'.format(round((end - start)/3600, 2))
-    print '**** SCRIPT PERFORMANCE - {} ITEMS/HR ****'.format(round(count / ((end - start)/3600), 2))
-    print '**** SCRIPT PERFORMANCE - {} PROFITABLE/HR ****'.format(round(profit_count / ((end - start)/3600), 2))
+    print '**** SCRIPT EXECUTION TIME - {} hrs ****'.format(round((end - start)/3600, 2))
+    print '**** SCRIPT EXECUTION TIME - {} mins ****'.format(round((end - start)/60, 2))
+    print '**** SCRIPT PERFORMANCE - {} ITEMS/min ****'.format(round(count / ((end - start)/60), 2))
+    print '**** SCRIPT PERFORMANCE - {} PROFITABLE/min ****'.format(round(profit_count / ((end - start)/60), 2))
     print '**** {} PROFITABLE BOOKS IDENTIFIED ****'.format(profit_count)
 
 
