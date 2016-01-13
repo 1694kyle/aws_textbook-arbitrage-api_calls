@@ -27,7 +27,7 @@ def get_latest_key(keys):
 
 
 def write_item_key(key_file):
-    path = r'scraping_items/items/'
+    path = r'scraping_items/'
     full_key_name = os.path.join(path, os.path.basename(key_file))
     k = bucket.new_key(full_key_name)
     k.set_contents_from_filename(key_file)
@@ -143,7 +143,6 @@ def main(asin_key, max_depth):
     asin_csv = sorted(asin_csv, key=operator.itemgetter(1), reverse=True)  # sort on trade eligible books
     for row in asin_csv:
         count += 1
-        if count > 100 : break
         asin = row[0]
         write('{} - {}'.format(count, asin), log_file)
         next_asin_set = recursive_amzn(asin, depth=max_depth)
@@ -176,7 +175,7 @@ if __name__ == '__main__':
     roi_min = 15
     count = 0
     profit_count = 0
-    date = datetime.today().date()
+    # date = datetime.today().date()
     items = []
     max_depth = 3  # set depth to check similar items
     tab_depth = 1
@@ -197,11 +196,15 @@ if __name__ == '__main__':
     with open(profitable_file, 'wb') as f:
         f.write('{}, {}, {}, {}, {}\n'.format('asin', 'price', 'profit', 'roi', 'url'))
     with open(item_file, 'wb') as f:
-        f.write('{},{}/n'.format('isbn10', 'trade_eligible'))
+        f.write('{},{}\n'.format('isbn10', 'trade_eligible'))
 
     # seen db
     db_dir = os.path.join(LOCAL_OUTPUT_DIR, 'Items')
-    os.remove(max(glob.glob(os.path.join(db_dir, '*.db')), key=os.path.getmtime))
+    # remove last db if it's there
+    try:
+        os.remove(max(glob.glob(os.path.join(db_dir, '*.db')), key=os.path.getmtime))
+    except:
+        pass
     dup_db = os.path.join(db_dir, 'dup - {}.db'.format(date))
     sql = sqlite3.connect(dup_db)
     cur = sql.cursor()
