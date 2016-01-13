@@ -39,8 +39,8 @@
       <file leaf-file-name="recursive_amzn_search.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/recursive_amzn_search.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.5627615">
-              <caret line="144" column="18" selection-start-line="144" selection-start-column="18" selection-end-line="144" selection-end-column="18" />
+            <state vertical-scroll-proportion="0.70083684">
+              <caret line="228" column="0" selection-start-line="228" selection-start-column="0" selection-end-line="228" selection-end-column="0" />
               <folding>
                 <element signature="e#0#33#0" expanded="true" />
               </folding>
@@ -404,12 +404,6 @@
       <option name="number" value="Default" />
       <updated>1445444780902</updated>
     </task>
-    <task id="LOCAL-00038" summary="init">
-      <created>1445901186755</created>
-      <option name="number" value="00038" />
-      <option name="project" value="LOCAL" />
-      <updated>1445901186755</updated>
-    </task>
     <task id="LOCAL-00039" summary="init">
       <created>1445956000909</created>
       <option name="number" value="00039" />
@@ -698,7 +692,13 @@
       <option name="project" value="LOCAL" />
       <updated>1452706029447</updated>
     </task>
-    <option name="localTasksCounter" value="87" />
+    <task id="LOCAL-00087" summary="init">
+      <created>1452706833932</created>
+      <option name="number" value="00087" />
+      <option name="project" value="LOCAL" />
+      <updated>1452706833932</updated>
+    </task>
+    <option name="localTasksCounter" value="88" />
     <servers />
   </component>
   <component name="TodoView" selected-index="4">
@@ -1253,8 +1253,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/recursive_amzn_search.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.5627615">
-          <caret line="144" column="18" selection-start-line="144" selection-start-column="18" selection-end-line="144" selection-end-column="18" />
+        <state vertical-scroll-proportion="0.70083684">
+          <caret line="228" column="0" selection-start-line="228" selection-start-column="0" selection-end-line="228" selection-end-column="0" />
           <folding>
             <element signature="e#0#33#0" expanded="true" />
           </folding>

@@ -222,7 +222,10 @@ if __name__ == '__main__':
     print '*' * 15
     print '**** SCRIPT ENDED AT {} ****'.format(time.ctime(int(time.time())))
     print '**** SCRIPT EXECUTION TIME - {} HRS ****'.format(round((end - start)/3600, 2))
+    print '**** SCRIPT PERFORMANCE - {} ITEMS/HR ****'.format(round(count / ((end - start)/3600), 2))
+    print '**** SCRIPT PERFORMANCE - {} PROFITABLE/HR ****'.format(round(profit_count / ((end - start)/3600), 2))
     print '**** {} PROFITABLE BOOKS IDENTIFIED ****'.format(profit_count)
+
 
     # closeout
     cur.close()
