@@ -54,7 +54,11 @@ def recursive_amzn(asin, depth=3):
             except:
                 response = None
         if response is not None:
-            found = [item for item in response.Items.Item if not seendb(item.ASIN.text)]
+            try:
+                found = [item for item in response.Items.Item if not seendb(item.ASIN.text)]
+            except Exception as e:
+                print e
+                yield None
             trade_eligible_found = [item for item in found if trade_eligible(item)]
             for item in trade_eligible_found:
                 yield item
