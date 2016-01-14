@@ -42,28 +42,35 @@ def write(text, fname, profit=False):
 
 
 def recursive_amzn(asin, depth=3):
-    global tab_depth
+    """
+    recursive api calls for items similar to asin
+    :param asin:
+    :param depth:
+    :return:
+    """
+    global tab_depth, log_file
     depth -= 1
     tab_depth = depth
     if depth > 0:
-        try:
+        try:  # try similar search
             response = api.similarity_lookup(asin, ResponseGroup='Large')
         except:
-            try:
+            try:  # no similar items, look up asin instead
                 response = api.item_lookup(asin, ResponseGroup='Large')
             except:
                 response = None
-        if response is not None:
+        if response is not None and hasattr(response, 'Items'):
             try:
                 found = [item for item in response.Items.Item if not seendb(item.ASIN.text)]
+                trade_eligible_found = [item for item in found if trade_eligible(item)]
+                for item in trade_eligible_found:
+                    yield item
+                    for nitem in recursive_amzn(item.ASIN.text, depth):
+                        yield nitem
             except Exception as e:
-                print e
+                print 'recursive_amzn exception', asin, e
+                write('{} {} - {}'.format('recursive_amzn exception', asin, e), log_file)
                 yield None
-            trade_eligible_found = [item for item in found if trade_eligible(item)]
-            for item in trade_eligible_found:
-                yield item
-                for nitem in recursive_amzn(item.ASIN.text, depth):
-                    yield nitem
         else:
             yield None
 
@@ -76,7 +83,7 @@ def trade_eligible(item):
 
 
 def check_profit(items):
-    global profit_count, count, tab_depth, max_depth, profit_min, roi_min, item_file
+    global profit_count, count, tab_depth, max_depth
     for item in items:
         if item is None:
             continue
@@ -140,7 +147,7 @@ def seendb(asin):
 
 
 def main(asin_key, max_depth):
-    global count, items
+    global count
     # create download url for key file
     response = urllib2.urlopen(asin_key.generate_url(120))  # download url expires in 120 sec
     asin_csv = csv.reader(response)
@@ -155,7 +162,8 @@ def main(asin_key, max_depth):
         try:
             check_profit(next_asin_set)
         except Exception as e:
-            print e
+            print 'main exception', e
+            write('{} - {}'.format('main exception', e), log_file)
             continue
 
 
