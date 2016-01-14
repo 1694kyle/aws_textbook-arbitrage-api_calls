@@ -3,7 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="cdee3a1e-30fe-477b-af5a-dad4a1e4c525" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/recursive_amzn_search.py" afterPath="$PROJECT_DIR$/recursive_amzn_search.py" />
     </list>
     <ignored path="amazon-api.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -404,12 +403,6 @@
       <option name="number" value="Default" />
       <updated>1445444780902</updated>
     </task>
-    <task id="LOCAL-00045" summary="init">
-      <created>1445968363260</created>
-      <option name="number" value="00045" />
-      <option name="project" value="LOCAL" />
-      <updated>1445968363260</updated>
-    </task>
     <task id="LOCAL-00046" summary="init">
       <created>1445987114435</created>
       <option name="number" value="00046" />
@@ -698,7 +691,13 @@
       <option name="project" value="LOCAL" />
       <updated>1452787822579</updated>
     </task>
-    <option name="localTasksCounter" value="94" />
+    <task id="LOCAL-00094" summary="init">
+      <created>1452791249691</created>
+      <option name="number" value="00094" />
+      <option name="project" value="LOCAL" />
+      <updated>1452791249691</updated>
+    </task>
+    <option name="localTasksCounter" value="95" />
     <servers />
   </component>
   <component name="TodoView" selected-index="4">
