@@ -157,6 +157,7 @@ def main(asin_key, max_depth):
         count += 1
         asin = row[0]
         write('{} - {}'.format(count, asin), log_file)
+        write('{},{}'.format(asin, 'True'), item_file)
         next_asin_set = recursive_amzn(asin, depth=max_depth)
 
         try:
