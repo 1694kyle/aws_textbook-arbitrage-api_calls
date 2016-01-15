@@ -77,6 +77,10 @@ def recursive_amzn(asin, depth=3):
             try:
                 found = [item for item in response.Items.Item if not seendb(item.ASIN.text)]
                 trade_eligible_found = [item for item in found if trade_eligible(item)]
+                not_trade_eligible = [item for item in found if item not in trade_eligible_found]  # still record items for future searching
+                for item in not_trade_eligible:
+                    if hasattr(item, 'ASIN'):
+                        write('{}, False'.format(item.ASIN), item_file)
                 for item in trade_eligible_found:
                     yield item
                     for nitem in recursive_amzn(item.ASIN.text, depth):
@@ -137,8 +141,6 @@ def check_profit(items):
             price = min(lowest_used_price, lowest_new_price)
             profit = (trade_value - price) - 3.99  # discount profit to include shipping
             roi = round(float(profit / price * 100), 2)
-            # print '{}\n\tPrice: {}\n\tProfit: {}\n\tROI: {}'.format(item.ASIN, price, profit, roi)
-            # write(fname=log_file, text='\tPrice: {}\n\tProfit: {}\n\tROI: {}'.format(price, profit, roi))
 
             if profit >= profit_min and roi >= roi_min:
                 profit_count += 1
@@ -166,7 +168,7 @@ def main(asin_key, max_depth):
     response = urllib2.urlopen(asin_key.generate_url(120))  # download url expires in 120 sec
     asin_csv = csv.reader(response)
     asin_csv.next()  # skip header row
-    asin_csv = (item for item in sorted((i for i in asin_csv if i[1] == 'True'), key=lambda k: random.random())[:int(200000 / max_depth)])  # create new gen to deliver randomized books up to 500k/max_depth
+    asin_csv = (item for item in sorted(asin_csv, key=lambda k: random.random())[:int(200000 / max_depth)])  # create new gen to deliver randomized books up to 500k/max_depth  (i for i in asin_csv if i[1] == 'True')
     for row in asin_csv:
         count += 1
         asin = row[0]
@@ -268,4 +270,3 @@ if __name__ == '__main__':
         os.remove(profitable_file)
     if count > 0:
         write_item_key(item_file)
-
