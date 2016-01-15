@@ -55,6 +55,8 @@ def recursive_amzn(asin, depth=3):
         try:  # try similar search
             response = api.similarity_lookup(asin, ResponseGroup='Large')
         except:
+            print 'No similar'
+            write(log_file, '{} - No Similar'.format(asin))
             try:  # no similar items, look up asin instead
                 response = api.item_lookup(asin, ResponseGroup='Large')
             except:
