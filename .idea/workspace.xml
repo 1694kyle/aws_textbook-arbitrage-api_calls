@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="cdee3a1e-30fe-477b-af5a-dad4a1e4c525" name="Default" comment="">
+    <list default="true" id="cdee3a1e-30fe-477b-af5a-dad4a1e4c525" name="Default" comment="init">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/recursive_amzn_search.py" afterPath="$PROJECT_DIR$/recursive_amzn_search.py" />
     </list>
@@ -404,12 +404,6 @@
       <option name="number" value="Default" />
       <updated>1445444780902</updated>
     </task>
-    <task id="LOCAL-00053" summary="init">
-      <created>1446077281060</created>
-      <option name="number" value="00053" />
-      <option name="project" value="LOCAL" />
-      <updated>1446077281060</updated>
-    </task>
     <task id="LOCAL-00054" summary="init">
       <created>1446134068722</created>
       <option name="number" value="00054" />
@@ -698,7 +692,13 @@
       <option name="project" value="LOCAL" />
       <updated>1452874550536</updated>
     </task>
-    <option name="localTasksCounter" value="102" />
+    <task id="LOCAL-00102" summary="init">
+      <created>1452876727213</created>
+      <option name="number" value="00102" />
+      <option name="project" value="LOCAL" />
+      <updated>1452876727213</updated>
+    </task>
+    <option name="localTasksCounter" value="103" />
     <servers />
   </component>
   <component name="TodoView" selected-index="4">
