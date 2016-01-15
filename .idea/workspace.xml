@@ -40,7 +40,7 @@
         <entry file="file://$PROJECT_DIR$/recursive_amzn_search.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.65416664">
-              <caret line="193" column="0" selection-start-line="193" selection-start-column="0" selection-end-line="193" selection-end-column="0" />
+              <caret line="76" column="36" selection-start-line="76" selection-start-column="36" selection-end-line="76" selection-end-column="36" />
               <folding>
                 <element signature="e#0#33#0" expanded="true" />
               </folding>
@@ -404,12 +404,6 @@
       <option name="number" value="Default" />
       <updated>1445444780902</updated>
     </task>
-    <task id="LOCAL-00058" summary="init">
-      <created>1446151016071</created>
-      <option name="number" value="00058" />
-      <option name="project" value="LOCAL" />
-      <updated>1446151016071</updated>
-    </task>
     <task id="LOCAL-00059" summary="init">
       <created>1446152088277</created>
       <option name="number" value="00059" />
@@ -698,7 +692,13 @@
       <option name="project" value="LOCAL" />
       <updated>1452887859130</updated>
     </task>
-    <option name="localTasksCounter" value="107" />
+    <task id="LOCAL-00107" summary="init">
+      <created>1452888164553</created>
+      <option name="number" value="00107" />
+      <option name="project" value="LOCAL" />
+      <updated>1452888164553</updated>
+    </task>
+    <option name="localTasksCounter" value="108" />
     <servers />
   </component>
   <component name="TodoView" selected-index="4">
@@ -787,12 +787,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="python-line">
           <url>file://$PROJECT_DIR$/recursive_amzn_search.py</url>
-          <line>287</line>
+          <line>289</line>
           <option name="timeStamp" value="176" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="python-line">
           <url>file://$PROJECT_DIR$/recursive_amzn_search.py</url>
-          <line>186</line>
+          <line>188</line>
           <option name="timeStamp" value="194" />
         </line-breakpoint>
       </breakpoints>
@@ -1259,7 +1259,7 @@
     <entry file="file://$PROJECT_DIR$/recursive_amzn_search.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.65416664">
-          <caret line="193" column="0" selection-start-line="193" selection-start-column="0" selection-end-line="193" selection-end-column="0" />
+          <caret line="76" column="36" selection-start-line="76" selection-start-column="36" selection-end-line="76" selection-end-column="36" />
           <folding>
             <element signature="e#0#33#0" expanded="true" />
           </folding>

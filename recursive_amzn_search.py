@@ -62,6 +62,7 @@ def recursive_amzn(asin, depth=3):
             except Exception as e:
                 if 'timed out' in e:
                     # print 'timed out {}'.format(datetime.now())
+                    write('timed out {}'.format(datetime.now()), log_file)
                     time.sleep(2)
                     continue
                 else:
@@ -71,6 +72,7 @@ def recursive_amzn(asin, depth=3):
                     except Exception as e:
                         if 'timed out' in e:
                             # print 'timed out {}'.format(datetime.now())
+                            write('timed out {}'.format(datetime.now()), log_file)
                             time.sleep(2)
                             continue
 
