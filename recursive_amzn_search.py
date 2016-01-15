@@ -57,7 +57,7 @@ def recursive_amzn(asin, depth=3):
         # trying to catch time out error from api
         while True:
             try_count = 0
-            if try_count > 10:
+            if try_count > 5:
                 response = None
                 break
             try:  # try similar search
