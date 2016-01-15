@@ -13,7 +13,8 @@ import time
 import sqlite3
 import glob
 import random
-
+import pandas as pd
+import numpy as np
 
 def get_latest_key(keys):
     """
@@ -166,22 +167,31 @@ def main(asin_key, max_depth):
     global count
     # create download url for key file
     response = urllib2.urlopen(asin_key.generate_url(120))  # download url expires in 120 sec
-    asin_csv = csv.reader(response)
-    asin_csv.next()  # skip header row
-    items = [item for item in asin_csv]
+    # todo: maybe try using pandas to handle this
+    # asin_csv = csv.reader(response)
+    # asin_csv.next()  # skip header row
+    # items = [item for item in asin_csv]
 
-    random_true_asin = sorted((i for i in items if i[1] == 'True'), key=lambda k: random.random())
-    false_asin = [i for i in items if i[1] != 'True']
+    # random_true_asin = sorted((i for i in items if i[1] == 'True'), key=lambda k: random.random())
+    # false_asin = [i for i in items if i[1] != 'True']
+    #
+    # asin_csv = (item for item in (random_true_asin + false_asin)[:int(200000 / max_depth)])  # create new gen to deliver randomized books up to 5200k/max_depth
+    # random_true_asin = []  # clean up
+    # false_asin = []  # clean up
 
-    asin_csv = (item for item in (random_true_asin + false_asin)[:int(200000 / max_depth)])  # create new gen to deliver randomized books up to 5200k/max_depth
-    random_true_asin = []  # clean up
-    false_asin = []  # clean up
-    for row in asin_csv:
+    asin_frame = pd.read_csv(response)
+
+    # randomize frame and sort by trade_eligible = True
+    asin_frame = asin_frame.reindex(np.random.permutation(asin_frame.index)).sort('trade_eligible', ascending=False)
+
+    for row in asin_frame[1:].iterrows():
+        row = row[1]
         count += 1
-        asin = row[0]
+        asin = row.isbn10
         write('{} - {}'.format(count, asin), log_file)
         write('{},{}'.format(asin, 'True'), item_file)
         next_asin_set = recursive_amzn(asin, depth=max_depth)
+
 
         try:
             check_profit(next_asin_set)
