@@ -152,7 +152,7 @@ def main(asin_key, max_depth):
     response = urllib2.urlopen(asin_key.generate_url(120))  # download url expires in 120 sec
     asin_csv = csv.reader(response)
     asin_csv.next()  # skip header row
-    asin_csv = (item for item in sorted(asin_csv, key=lambda k: random.random())[:200000/max_depth])  # create new gen to deliver randomized books up to 500k/max_depth
+    asin_csv = (item for item in sorted((i for i in asin_csv if i[1] == 'True'), key=lambda k: random.random())[:int(200000 / max_depth)])  # create new gen to deliver randomized books up to 500k/max_depth
     for row in asin_csv:
         count += 1
         asin = row[0]
