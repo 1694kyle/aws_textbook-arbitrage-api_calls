@@ -52,15 +52,27 @@ def recursive_amzn(asin, depth=3):
     depth -= 1
     tab_depth = depth
     if depth > 0:
-        try:  # try similar search
-            response = api.similarity_lookup(asin, ResponseGroup='Large')
-        except:
-            print 'No similar'
-            write(log_file, '{} - No Similar'.format(asin))
-            try:  # no similar items, look up asin instead
-                response = api.item_lookup(asin, ResponseGroup='Large')
-            except:
-                response = None
+        response = None
+        # trying to catch time out error from api
+        while True:
+            try:  # try similar search
+                response = api.similarity_lookup(asin, ResponseGroup='Large')
+                break
+            except Exception as e:
+                if 'timed out' in e:
+                    # print 'timed out {}'.format(datetime.now())
+                    time.sleep(2)
+                    continue
+                else:
+                    try:  # no similar items, look up asin instead
+                        response = api.item_lookup(asin, ResponseGroup='Large')
+                        break
+                    except Exception as e:
+                        if 'timed out' in e:
+                            # print 'timed out {}'.format(datetime.now())
+                            time.sleep(2)
+                            continue
+
         if response is not None and hasattr(response, 'Items'):
             try:
                 found = [item for item in response.Items.Item if not seendb(item.ASIN.text)]
