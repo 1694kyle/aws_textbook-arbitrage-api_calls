@@ -56,7 +56,12 @@ def recursive_amzn(asin, depth=3):
         response = None
         # trying to catch time out error from api
         while True:
+            try_count = 0
+            if try_count > 10:
+                response = None
+                break
             try:  # try similar search
+                try_count += 1
                 response = api.similarity_lookup(asin, ResponseGroup='Large')
                 break
             except Exception as e:
@@ -67,6 +72,7 @@ def recursive_amzn(asin, depth=3):
                     continue
                 else:
                     try:  # no similar items, look up asin instead
+                        try_count += 1
                         response = api.item_lookup(asin, ResponseGroup='Large')
                         break
                     except Exception as e:
