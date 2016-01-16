@@ -1,17 +1,20 @@
-import glob
-import os
-import re
-import sqlite3
-import time
-import urllib2
-from datetime import datetime
-from operator import itemgetter
-
-import boto
-import numpy as np
-import pandas as pd
 from amazonproduct.api import API
-
+from datetime import datetime
+import os
+from result_email import send_mail_via_smtp
+from amazonproduct.errors import AWSError
+from operator import itemgetter
+import re
+import boto
+import csv
+import urllib2
+import operator
+import time
+import sqlite3
+import glob
+import random
+import pandas as pd
+import numpy as np
 
 def get_latest_key(keys):
     """
@@ -50,53 +53,25 @@ def recursive_amzn(asin, depth=3):
     depth -= 1
     tab_depth = depth
     if depth > 0:
-        response = None
-        # trying to catch time out error from api
-        while True:
-            try_count = 0
-            if try_count > 2:
-                response = None
-                break
-            try:  # try similar search
-                try_count += 1
-                response = api.similarity_lookup(asin, ResponseGroup='Large')
-                break
-            except Exception as e:
-                if 'timed out' in e:
-                    # print 'timed out {}'.format(datetime.now())
-                    write('ERROR timed out {} - {}'.format(datetime.now(), e), log_file)
-                    time.sleep(2)
-                    continue
-                else:
-                    try:  # no similar items, look up asin instead
-                        try_count += 1
-                        response = api.item_lookup(asin, ResponseGroup='Large')
-                        break
-                    except Exception as e:
-                        if 'timed out' in e:
-                            # print 'timed out {}'.format(datetime.now())
-                            write('ERROR timed out {} - {}'.format(datetime.now(), e), log_file)
-                            time.sleep(2)
-                            continue
+
+        # response = api.similarity_lookup(asin, ResponseGroup='Large')
+        response = api.item_lookup(asin, ResponseGroup='BrowseNodes')
 
         if response is not None and hasattr(response, 'Items'):
             try:
                 found = [item for item in response.Items.Item if not seendb(item.ASIN.text)]
                 trade_eligible_found = [item for item in found if trade_eligible(item)]
-
-                # not sure if should record items ineligible for trade
-                # not_trade_eligible = [item for item in found if item not in trade_eligible_found]  # still record items for future searching
-                # for item in not_trade_eligible:
-                #     if hasattr(item, 'ASIN'):
-                #         write('{}, False'.format(item.ASIN), item_file)
-
+                not_trade_eligible = [item for item in found if item not in trade_eligible_found]  # still record items for future searching
+                for item in not_trade_eligible:
+                    if hasattr(item, 'ASIN'):
+                        write('{}, False'.format(item.ASIN), item_file)
                 for item in trade_eligible_found:
                     yield item
                     for nitem in recursive_amzn(item.ASIN.text, depth):
                         yield nitem
             except Exception as e:
                 print 'recursive_amzn exception', asin, e
-                write('ERROR {} {} - {}'.format('recursive_amzn exception', asin, e), log_file)
+                write('{} {} - {}'.format('recursive_amzn exception', asin, e), log_file)
                 yield None
         else:
             yield None
@@ -162,7 +137,7 @@ def check_profit(items):
 def seendb(asin):
     cur.execute('SELECT * FROM seen WHERE ID=?', [asin])
     if cur.fetchone():
-        # Item already in database
+        # Post is already in the database
         return True
 
     cur.execute('INSERT INTO seen VALUES(?)', [asin])
@@ -175,6 +150,17 @@ def main(asin_key, max_depth):
     global count
     # create download url for key file
     response = urllib2.urlopen(asin_key.generate_url(120))  # download url expires in 120 sec
+
+    # asin_csv = csv.reader(response)
+    # asin_csv.next()  # skip header row
+    # items = [item for item in asin_csv]
+
+    # random_true_asin = sorted((i for i in items if i[1] == 'True'), key=lambda k: random.random())
+    # false_asin = [i for i in items if i[1] != 'True']
+    #
+    # asin_csv = (item for item in (random_true_asin + false_asin)[:int(200000 / max_depth)])  # create new gen to deliver randomized books up to 5200k/max_depth
+    # random_true_asin = []  # clean up
+    # false_asin = []  # clean up
 
     asin_frame = pd.read_csv(response)
 
@@ -276,5 +262,10 @@ if __name__ == '__main__':
 
     # closeout
     cur.close()
+    if profit_count > 0:  # send email if profitable items
+        pass  # output going to onedrive, so no need for email right now
+        #send_mail_via_smtp(profitable_file)
+    else:
+        os.remove(profitable_file)
     if count > 0:
         write_item_key(item_file)
