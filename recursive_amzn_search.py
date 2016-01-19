@@ -4,13 +4,14 @@ import re
 import sqlite3
 import time
 import urllib2
-from datetime import datetime
+from datetime import datetime, timedelta
 from operator import itemgetter
 
 import boto
 import numpy as np
 import pandas as pd
 from amazonproduct.api import API
+from amazonproduct import AWSError
 
 
 def get_latest_key(keys):
@@ -50,34 +51,8 @@ def recursive_amzn(asin, depth=3):
     depth -= 1
     tab_depth = depth
     if depth > 0:
-        response = None
-        # trying to catch time out error from api
-        while True:
-            try_count = 0
-            if try_count > 2:
-                response = None
-                break
-            try:  # try similar search
-                try_count += 1
-                response = api.similarity_lookup(asin, ResponseGroup='Large')
-                break
-            except Exception as e:
-                if 'timed out' in e:
-                    # print 'timed out {}'.format(datetime.now())
-                    write('ERROR timed out {} - {}'.format(datetime.now(), e), log_file)
-                    time.sleep(2)
-                    continue
-                else:
-                    try:  # no similar items, look up asin instead
-                        try_count += 1
-                        response = api.item_lookup(asin, ResponseGroup='Large')
-                        break
-                    except Exception as e:
-                        if 'timed out' in e:
-                            # print 'timed out {}'.format(datetime.now())
-                            write('ERROR timed out {} - {}'.format(datetime.now(), e), log_file)
-                            time.sleep(2)
-                            continue
+
+        response = amzn_search(asin)
 
         if response is not None and hasattr(response, 'Items'):
             try:
@@ -100,6 +75,26 @@ def recursive_amzn(asin, depth=3):
                 yield None
         else:
             yield None
+
+
+def amzn_search(asin):
+    response = None
+    t1 = datetime.now()
+    try:  # try similar search
+            response = api.similarity_lookup(asin, ResponseGroup='Large')
+    except AWSError as e:
+            t2 = datetime.now()
+            throttle = timedelta(seconds=1/api.REQUESTS_PER_SECOND)
+            wait = throttle - (t2 - t1)
+            time.sleep(wait.seconds+wait.microseconds/1000000.0)
+            write('ERROR amzn_search {} - {}'.format(datetime.now(), e.code), log_file)
+            if e.code == 'AWS.ECommerceService.NoSimilarities':
+                try:  # no similar items, look up asin instead
+                    response = api.item_lookup(asin, ResponseGroup='Large')
+                except AWSError as e:
+                    write('\tERROR amzn_search {} - {}'.format(datetime.now(), e.code), log_file)
+
+    return response
 
 
 def trade_eligible(item):
@@ -210,7 +205,7 @@ if __name__ == '__main__':
     keys = bucket.list()
     latest_items_key = get_latest_key(keys)
 
-    # set up api
+    # set up amazon api
     api = API(locale='us')
 
     # misc variables
@@ -218,14 +213,13 @@ if __name__ == '__main__':
     roi_min = 15
     count = 0
     profit_count = 0
-    # date = datetime.today().date()
     items = []
     max_depth = 3  # set depth to check similar items
     tab_depth = 1
 
     # set up output location
-    # LOCAL_OUTPUT_DIR = os.path.join(os.environ.get('HOME'), 'Desktop', 'Recursive Search Results')
-    LOCAL_OUTPUT_DIR = os.path.join(os.environ.get('ONEDRIVE_PATH'), 'Recursive Search Results')
+    LOCAL_OUTPUT_DIR = os.path.join(os.environ.get('HOME'), 'Desktop', 'Recursive Search Results')
+    # LOCAL_OUTPUT_DIR = os.path.join(os.environ.get('ONEDRIVE_PATH'), 'Recursive Search Results')
     log_file = os.path.join(LOCAL_OUTPUT_DIR, 'Logs', 'log - {}.csv'.format(date))
     profitable_file = os.path.join(LOCAL_OUTPUT_DIR, 'Profitable', 'profitable - {}.csv'.format(date))
     item_file = os.path.join(LOCAL_OUTPUT_DIR, 'Items', 'items-{}.csv'.format(date))
