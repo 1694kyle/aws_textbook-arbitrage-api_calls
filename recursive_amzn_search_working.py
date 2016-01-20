@@ -123,7 +123,7 @@ def check_price_attributes(item):
                 lowest_new_price = 999
 
             try:
-                url = item.offer_url
+                url = item.DetailPageURL
             except:
                 url = ''
 
