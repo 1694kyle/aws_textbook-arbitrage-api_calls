@@ -12,27 +12,12 @@ import operator
 import time
 import sqlite3
 import glob
-import random
-import pandas as pd
-import numpy as np
 
-def get_latest_key(keys):
-    """
-    gets the latest key from s3 bucket "textbook arbitrage"
-    :param keys:
-    :return:
-    """
+def item_keys(keys):
     regex = re.compile(r'scraping_items\/items-(.+)\.csv')
     keys = [(key, datetime.strptime(regex.search(key.name).group(1), '%m-%d-%Y')) for key in keys if regex.match(key.name)]
     latest_key = max(keys, key=itemgetter(1))[0]
     return latest_key
-
-
-def write_item_key(key_file):
-    path = r'scraping_items/'
-    full_key_name = os.path.join(path, os.path.basename(key_file))
-    k = bucket.new_key(full_key_name)
-    k.set_contents_from_filename(key_file)
 
 
 def write(text, fname, profit=False):
@@ -43,36 +28,24 @@ def write(text, fname, profit=False):
 
 
 def recursive_amzn(asin, depth=3):
-    """
-    recursive api calls for items similar to asin
-    :param asin:
-    :param depth:
-    :return:
-    """
-    global tab_depth, log_file
+    global tab_depth
     depth -= 1
     tab_depth = depth
     if depth > 0:
-
-        # response = api.similarity_lookup(asin, ResponseGroup='Large')
-        response = api.item_lookup(asin, ResponseGroup='BrowseNodes')
-
-        if response is not None and hasattr(response, 'Items'):
+        try:
+            response = api.similarity_lookup(asin, ResponseGroup='Large')
+        except:
             try:
-                found = [item for item in response.Items.Item if not seendb(item.ASIN.text)]
-                trade_eligible_found = [item for item in found if trade_eligible(item)]
-                not_trade_eligible = [item for item in found if item not in trade_eligible_found]  # still record items for future searching
-                for item in not_trade_eligible:
-                    if hasattr(item, 'ASIN'):
-                        write('{}, False'.format(item.ASIN), item_file)
-                for item in trade_eligible_found:
-                    yield item
-                    for nitem in recursive_amzn(item.ASIN.text, depth):
-                        yield nitem
-            except Exception as e:
-                print 'recursive_amzn exception', asin, e
-                write('{} {} - {}'.format('recursive_amzn exception', asin, e), log_file)
-                yield None
+                response = api.item_lookup(asin, ResponseGroup='Large')
+            except:
+                response = None
+        if response is not None:
+            found = [item for item in response.Items.Item if not seendb(item.ASIN.text)]
+            trade_eligible_found = [item for item in found if trade_eligible(item)]
+            for item in trade_eligible_found:
+                yield item
+                for nitem in recursive_amzn(item.ASIN.text, depth):
+                    yield nitem
         else:
             yield None
 
@@ -89,9 +62,8 @@ def check_profit(items):
     for item in items:
         if item is None:
             continue
-        count += 1
         write('{}{} - {}'.format('\t' * (max_depth - tab_depth), count, item.ASIN), log_file)
-        write('{},{}'.format(item.ASIN.text, 'True'), item_file)
+        count += 1
         if hasattr(item.ItemAttributes, 'TradeInValue'):
             try:
                 trade_value = item.ItemAttributes.TradeInValue.Amount / 100.0
@@ -123,10 +95,12 @@ def check_profit(items):
                 url = ''
 
             price = min(lowest_used_price, lowest_new_price)
-            profit = (trade_value - price) - 3.99  # discount profit to include shipping
+            profit = (trade_value - price) - 3.99
             roi = round(float(profit / price * 100), 2)
+            # print '{}\n\tPrice: {}\n\tProfit: {}\n\tROI: {}'.format(item.ASIN, price, profit, roi)
+            # write(fname=log_file, text='\tPrice: {}\n\tProfit: {}\n\tROI: {}'.format(price, profit, roi))
 
-            if profit >= profit_min and roi >= roi_min:
+            if profit > 5:
                 profit_count += 1
                 print '{} - Profit of {} found - {}'.format(count, profit, item.ASIN)
                 write('{0}, {1}, {2}, {3}, {4}\n'.format(item.ASIN, price, profit, roi, url), fname=profitable_file, profit=True)
@@ -147,39 +121,22 @@ def seendb(asin):
 
 
 def main(asin_key, max_depth):
-    global count
+    global count, items
     # create download url for key file
     response = urllib2.urlopen(asin_key.generate_url(120))  # download url expires in 120 sec
-
-    # asin_csv = csv.reader(response)
-    # asin_csv.next()  # skip header row
-    # items = [item for item in asin_csv]
-
-    # random_true_asin = sorted((i for i in items if i[1] == 'True'), key=lambda k: random.random())
-    # false_asin = [i for i in items if i[1] != 'True']
-    #
-    # asin_csv = (item for item in (random_true_asin + false_asin)[:int(200000 / max_depth)])  # create new gen to deliver randomized books up to 5200k/max_depth
-    # random_true_asin = []  # clean up
-    # false_asin = []  # clean up
-
-    asin_frame = pd.read_csv(response)
-
-    # randomize frame and sort by trade_eligible = True
-    asin_frame = asin_frame.reindex(np.random.permutation(asin_frame.index)).sort('trade_eligible', ascending=False).reset_index(drop=True)
-    asin_frame.index += 1
-    for row in asin_frame[1:].iterrows():
-        row = row[1]
+    asin_csv = csv.reader(response)
+    asin_csv.next()  # skip header row
+    asin_csv = sorted(asin_csv, key=operator.itemgetter(1), reverse=True)  # sort on trade eligible books
+    for row in asin_csv:
         count += 1
-        asin = row.isbn10
+        asin = row[0]
         write('{} - {}'.format(count, asin), log_file)
-        write('{},{}'.format(asin, 'True'), item_file)
         next_asin_set = recursive_amzn(asin, depth=max_depth)
 
         try:
             check_profit(next_asin_set)
         except Exception as e:
-            print 'main exception', e
-            write('{} - {}'.format('main exception', e), log_file)
+            print e
             continue
 
 
@@ -194,47 +151,35 @@ if __name__ == '__main__':
 
     # get key
     keys = bucket.list()
-    latest_items_key = get_latest_key(keys)
+    latest_items_key = item_keys(keys)
 
     # set up api
     api = API(locale='us')
 
     # misc variables
-    profit_min = 10
-    roi_min = 15
     count = 0
     profit_count = 0
-    # date = datetime.today().date()
+    date = datetime.today().date()
     items = []
-    max_depth = 3  # set depth to check similar items
+    max_depth = 3
     tab_depth = 1
 
     # set up output location
-    # LOCAL_OUTPUT_DIR = os.path.join(os.environ.get('HOME'), 'Desktop', 'Recursive Search Results')
     LOCAL_OUTPUT_DIR = os.path.join(os.environ.get('ONEDRIVE_PATH'), 'Recursive Search Results')
     log_file = os.path.join(LOCAL_OUTPUT_DIR, 'Logs', 'log - {}.csv'.format(date))
     profitable_file = os.path.join(LOCAL_OUTPUT_DIR, 'Profitable', 'profitable - {}.csv'.format(date))
-    item_file = os.path.join(LOCAL_OUTPUT_DIR, 'Items', 'items-{}.csv'.format(date))
 
-    # crete out dirs if not there
     if not os.path.isdir(os.path.join(LOCAL_OUTPUT_DIR, 'Items')): os.makedirs(os.path.join(LOCAL_OUTPUT_DIR, 'Items'))
     if not os.path.isdir(os.path.join(LOCAL_OUTPUT_DIR, 'Logs')): os.makedirs(os.path.join(LOCAL_OUTPUT_DIR, 'Logs'))
     if not os.path.isdir(os.path.join(LOCAL_OUTPUT_DIR, 'Profitable')): os.makedirs(os.path.join(LOCAL_OUTPUT_DIR, 'Profitable'))
 
-    # create or overwrite out files
     open(log_file, 'wb').close()
     with open(profitable_file, 'wb') as f:
         f.write('{}, {}, {}, {}, {}\n'.format('asin', 'price', 'profit', 'roi', 'url'))
-    with open(item_file, 'wb') as f:
-        f.write('{},{}\n'.format('isbn10', 'trade_eligible'))
 
     # seen db
     db_dir = os.path.join(LOCAL_OUTPUT_DIR, 'Items')
-    # remove last db if it's there
-    try:
-        os.remove(max(glob.glob(os.path.join(db_dir, '*.db')), key=os.path.getmtime))
-    except:
-        pass
+    os.remove(max(glob.glob(os.path.join(db_dir, '*.db')), key=os.path.getmtime))
     dup_db = os.path.join(db_dir, 'dup - {}.db'.format(date))
     sql = sqlite3.connect(dup_db)
     cur = sql.cursor()
@@ -249,23 +194,15 @@ if __name__ == '__main__':
         print '****ERROR IN MAIN EXECUTION****'
         print e
     end = time.time()
-
-
     print '*' * 15
     print '**** SCRIPT ENDED AT {} ****'.format(time.ctime(int(time.time())))
-    print '**** SCRIPT EXECUTION TIME - {} hrs ****'.format(round((end - start)/3600, 2))
-    print '**** SCRIPT EXECUTION TIME - {} mins ****'.format(round((end - start)/60, 2))
-    print '**** SCRIPT PERFORMANCE - {} ITEMS/min ****'.format(round(count / ((end - start)/60), 2))
-    print '**** SCRIPT PERFORMANCE - {} PROFITABLE/min ****'.format(round(profit_count / ((end - start)/60), 2))
+    print '**** SCRIPT EXECUTION TIME - {} HRS ****'.format(round((end - start)/3600, 2))
     print '**** {} PROFITABLE BOOKS IDENTIFIED ****'.format(profit_count)
-
 
     # closeout
     cur.close()
     if profit_count > 0:  # send email if profitable items
-        pass  # output going to onedrive, so no need for email right now
-        #send_mail_via_smtp(profitable_file)
+        send_mail_via_smtp(profitable_file)
     else:
         os.remove(profitable_file)
-    if count > 0:
-        write_item_key(item_file)
+

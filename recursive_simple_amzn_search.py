@@ -3,17 +3,20 @@ import os
 import re
 import sqlite3
 import time
+import random
 import urllib2
+from urllib2 import HTTPError
 from datetime import datetime, timedelta
 from operator import itemgetter
 
 import boto
 import numpy as np
 import pandas as pd
-from amazonproduct.api import API
-from amazonproduct import AWSError
 
 from amazon.api import AmazonAPI
+from amazon.api import AmazonException
+
+
 
 def get_latest_key(keys):
     """
@@ -65,12 +68,11 @@ def recursive_amzn(asin, depth=3):
     tab_depth = depth
     if depth > 0:
 
-        response = amzn_search(asin)
-        # response = simple_amzn_search(asin)
+        response = simple_amzn_search(asin)
 
         if response is not None:
             try:
-                found = [item for item in response.Items.Item if not seendb(item.ASIN.text)]
+                found = [item for item in response if not seendb(item.asin)]
                 trade_eligible_found = [item for item in found if trade_eligible(item)]
 
                 # not sure if should record items ineligible for trade
@@ -81,11 +83,11 @@ def recursive_amzn(asin, depth=3):
 
                 for item in trade_eligible_found:
                     yield item
-                    for nitem in recursive_amzn(item.ASIN.text, depth):
+                    for nitem in recursive_amzn(item.asin, depth):
                         yield nitem
 
                 yield None
-            except AttributeError:
+            except AttributeError as e:
                 yield None
         else:
             yield None
@@ -94,47 +96,9 @@ def recursive_amzn(asin, depth=3):
 def simple_amzn_search(asin):
     response = amazon.similarity_lookup(ItemId=asin)
     if len(response) == 0:
-        response = None
-    return response
-
-
-def amzn_search(asin):
-    """
-    amazon api call for similar items. If initial fails, tries item_lookup instead
-    :param asin: amazon id number
-    :return:
-    """
-    response = None
-    throttle = timedelta(seconds=1/api.REQUESTS_PER_SECOND)
-    t1 = datetime.now()
-    try:  # try similar search
-        response = api.similarity_lookup(asin, ResponseGroup='Large')
-    except AWSError as e:
-        # nothing similar, throttle and try item_lookup
-        if hasattr(e, 'code') and e.code == 'AWS.ECommerceService.NoSimilarities':
-            write('No Similar - {}'.format(asin), log_file)
-            t2 = datetime.now()
-            wait = throttle - (t2 - t1)
-            time.sleep(wait.seconds + wait.microseconds / 1000000.0)
-            try:  # no similar items, look up asin instead
-                response = api.item_lookup(asin, ResponseGroup='Large')
-            except AWSError as e:
-                print 'amzn_search Unhandled AWSError'
-                write('\tERROR amzn_search {} - UNHANDLED AWS: {}'.format(datetime.now(), e.code), log_file)
-        # request throttled, wait and try again
-        elif hasattr(e, 'message') and e.message == 'timed out':
-            print 'amzn_search timed out'
-            time.sleep(api.REQUESTS_PER_SECOND)
-            amzn_search(asin)
-        # unhandled exception
-        elif hasattr(e, 'errno') and e.errno == 10054:
-            print 'amzn_search Unhandled Exception'
-            write('ERROR amzn_search {} - UNHANDLED EXCEPTION: {}'.format(datetime.now(), e), log_file)
-            time.sleep(api.REQUESTS_PER_SECOND)
-            amzn_search(asin)
-        else:
-            print e
-
+        response = [amazon.lookup(ItemId=asin)]
+        if not hasattr(response, 'asin'):
+            response = None
     return response
 
 
@@ -144,7 +108,7 @@ def trade_eligible(item):
     :param item:
     :return: boolean
     """
-    if hasattr(item.ItemAttributes, 'IsEligibleForTradeIn'):
+    if hasattr(item.parsed_response.ItemAttributes, 'IsEligibleForTradeIn'):
         return True
     else:
         return False
@@ -162,8 +126,8 @@ def check_profit(items):
         if item is None:
             continue
         count += 1
-        write('{}{} - {}'.format('\t' * (max_depth - tab_depth), count, item.ASIN), log_file)
-        write('{},{}'.format(item.ASIN.text, 'True'), item_file)
+        write('{}{} - {}'.format('\t' * (max_depth - tab_depth), count, item.asin), log_file)
+        write('{},{}'.format(item.asin, 'True'), item_file)
 
         trade_value, lowest_used_price, lowest_new_price, url = check_price_attributes(item)
 
@@ -174,43 +138,35 @@ def check_profit(items):
 
             if profit >= profit_min and roi >= roi_min:
                 profit_count += 1
-                print '{} - Profit of {} found - {}'.format(count, profit, item.ASIN)
-                write('{0}, {1}, {2}, {3}, {4}\n'.format(item.ASIN, price, profit, roi, url), fname=profitable_file, profit=True)
+                print '{} - Profit of {} found - {}'.format(count, profit, item.asin)
+                write('{0}, {1}, {2}, {3}, {4}\n'.format(item.asin, price, profit, roi, url), fname=profitable_file, profit=True)
         else:
             continue
 
 
 def check_price_attributes(item):
     trade_value, lowest_used_price, lowest_new_price, url = (None for i in range(4))
-    if hasattr(item.ItemAttributes, 'TradeInValue'):
+    if hasattr(item.parsed_response.ItemAttributes, 'TradeInValue'):
             try:
-                trade_value = item.ItemAttributes.TradeInValue.Amount / 100.0
+                trade_value = item.parsed_response.ItemAttributes.TradeInValue.Amount / 100.0
             except:
                 trade_value = 0
 
-            if hasattr(item.OfferSummary, 'LowestUsedPrice'):
-                try:
-                    lowest_used_price = item.OfferSummary.LowestUsedPrice.Amount / 100.0
-                except:
-                    lowest_used_price = 999
-            else:
+            try:
+                lowest_used_price = item.parsed_response.OfferSummary.LowestUsedPrice.Amount / 100.0
+            except:
                 lowest_used_price = 999
 
-            if hasattr(item.OfferSummary, 'LowestNewPrice'):
-                try:
-                    lowest_new_price = item.OfferSummary.LowestNewPrice.Amount / 100.0
-                except:
-                    lowest_new_price = 999
-            else:
+            try:
+                lowest_new_price = item.parsed_response.OfferSummary.LowestNewPrice.Amount / 100.0
+            except:
                 lowest_new_price = 999
 
-            if hasattr(item, 'DetailPageURL'):
-                try:
-                    url = item.DetailPageURL
-                except:
-                    url = ''
-            else:
+            try:
+                url = item.offer_url
+            except:
                 url = ''
+
     return trade_value, lowest_used_price, lowest_new_price, url
 
 
@@ -229,6 +185,13 @@ def seendb(asin):
     sql.commit()
 
     return False
+
+
+def error_handler(err):
+    ex = err['exception']
+    if isinstance(ex, HTTPError): # and (ex.code == 503 :
+        time.sleep(random.expovariate(0.1))
+        return True
 
 
 def main(asin_key, max_depth):
@@ -278,9 +241,8 @@ if __name__ == '__main__':
     keys = bucket.list()
     latest_items_key = get_latest_key(keys)
 
-    # set up amazon-product-api
-    api = API(locale='us')
-    # amazon = AmazonAPI(AWS_ACCESS_KEY, AWS_SECRET_KEY, 'boutiqueguita-20')
+    # set up api
+    amazon = AmazonAPI(AWS_ACCESS_KEY, AWS_SECRET_KEY, 'boutiqueguita-20', ErrorHandler=error_handler, Region='US', MaxQPS=.9)
 
     # misc variables
     profit_min = 10
