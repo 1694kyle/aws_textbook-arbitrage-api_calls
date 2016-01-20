@@ -1,19 +1,19 @@
-from amazonproduct.api import API
-from datetime import datetime
-import os
-from result_email import send_mail_via_smtp
-from amazonproduct.errors import AWSError
-from operator import itemgetter
-import re
-import boto
 import csv
-import urllib2
-import operator
-import time
-import sqlite3
 import glob
+import operator
+import os
+import re
+import sqlite3
+import time
+import urllib2
+from datetime import datetime
+from operator import itemgetter
 
-def item_keys(keys):
+import boto
+from amazonproduct.api import API
+
+
+def get_latest_key(keys):
     regex = re.compile(r'scraping_items\/items-(.+)\.csv')
     keys = [(key, datetime.strptime(regex.search(key.name).group(1), '%m-%d-%Y')) for key in keys if regex.match(key.name)]
     latest_key = max(keys, key=itemgetter(1))[0]
@@ -25,6 +25,17 @@ def write(text, fname, profit=False):
         f.write(text)
         if not profit:
             f.write('\n')
+
+def write_item_key(key_file):
+    """
+    writes item file to S3 bucket
+    :param key_file: item file in LOCAL OUTPUT DIR
+    :return:
+    """
+    path = r'scraping_items/'
+    full_key_name = os.path.join(path, os.path.basename(key_file))
+    k = bucket.new_key(full_key_name)
+    k.set_contents_from_filename(key_file)
 
 
 def recursive_amzn(asin, depth=3):
@@ -123,7 +134,7 @@ def seendb(asin):
 def main(asin_key, max_depth):
     global count, items
     # create download url for key file
-    response = urllib2.urlopen(asin_key.generate_url(120))  # download url expires in 120 sec
+    response = urllib2.urlopen(asin_key.generate_url(5))
     asin_csv = csv.reader(response)
     asin_csv.next()  # skip header row
     asin_csv = sorted(asin_csv, key=operator.itemgetter(1), reverse=True)  # sort on trade eligible books
@@ -142,7 +153,9 @@ def main(asin_key, max_depth):
 
 if __name__ == '__main__':
     # boto connection
-    conn = boto.connect_s3(os.environ['AWS_ACCESS_KEY'], os.environ['AWS_SECRET_KEY'])
+    AWS_ACCESS_KEY = os.environ.get('AWS_ACCESS_KEY')
+    AWS_SECRET_KEY = os.environ.get('AWS_SECRET_KEY')
+    conn = boto.connect_s3(AWS_ACCESS_KEY, AWS_SECRET_KEY)
     bucket = conn.get_bucket('textbook-arbitrage')
 
     # key parameters
@@ -151,35 +164,47 @@ if __name__ == '__main__':
 
     # get key
     keys = bucket.list()
-    latest_items_key = item_keys(keys)
+    latest_items_key = get_latest_key(keys)
 
-    # set up api
+    # set up amazon-product-api
     api = API(locale='us')
+    # amazon = AmazonAPI(AWS_ACCESS_KEY, AWS_SECRET_KEY, 'boutiqueguita-20')
 
     # misc variables
+    profit_min = 10
+    roi_min = 15
     count = 0
     profit_count = 0
-    date = datetime.today().date()
     items = []
-    max_depth = 3
+    max_depth = 3  # set depth to check similar items
     tab_depth = 1
 
     # set up output location
-    LOCAL_OUTPUT_DIR = os.path.join(os.environ.get('ONEDRIVE_PATH'), 'Recursive Search Results')
+    LOCAL_OUTPUT_DIR = os.path.join(os.environ.get('HOME'), 'Desktop', 'Recursive Search Results')
+    # LOCAL_OUTPUT_DIR = os.path.join(os.environ.get('ONEDRIVE_PATH'), 'Recursive Search Results')
     log_file = os.path.join(LOCAL_OUTPUT_DIR, 'Logs', 'log - {}.csv'.format(date))
     profitable_file = os.path.join(LOCAL_OUTPUT_DIR, 'Profitable', 'profitable - {}.csv'.format(date))
+    item_file = os.path.join(LOCAL_OUTPUT_DIR, 'Items', 'items-{}.csv'.format(date))
 
+    # crete out dirs if not there
     if not os.path.isdir(os.path.join(LOCAL_OUTPUT_DIR, 'Items')): os.makedirs(os.path.join(LOCAL_OUTPUT_DIR, 'Items'))
     if not os.path.isdir(os.path.join(LOCAL_OUTPUT_DIR, 'Logs')): os.makedirs(os.path.join(LOCAL_OUTPUT_DIR, 'Logs'))
     if not os.path.isdir(os.path.join(LOCAL_OUTPUT_DIR, 'Profitable')): os.makedirs(os.path.join(LOCAL_OUTPUT_DIR, 'Profitable'))
 
+    # create or overwrite out files
     open(log_file, 'wb').close()
     with open(profitable_file, 'wb') as f:
         f.write('{}, {}, {}, {}, {}\n'.format('asin', 'price', 'profit', 'roi', 'url'))
+    with open(item_file, 'wb') as f:
+        f.write('{},{}\n'.format('isbn10', 'trade_eligible'))
 
     # seen db
     db_dir = os.path.join(LOCAL_OUTPUT_DIR, 'Items')
-    os.remove(max(glob.glob(os.path.join(db_dir, '*.db')), key=os.path.getmtime))
+    # remove last db if it's there
+    try:
+        os.remove(max(glob.glob(os.path.join(db_dir, '*.db')), key=os.path.getmtime))
+    except:
+        pass
     dup_db = os.path.join(db_dir, 'dup - {}.db'.format(date))
     sql = sqlite3.connect(dup_db)
     cur = sql.cursor()
@@ -188,21 +213,24 @@ if __name__ == '__main__':
     # execution
     start = time.time()
     print '**** SCRIPT STARTED AT {} ****'.format(time.ctime(int(time.time())))
-    try:
-        main(latest_items_key, max_depth)
-    except Exception as e:
-        print '****ERROR IN MAIN EXECUTION****'
-        print e
+    # try:
+    main(latest_items_key, max_depth)
+    # except Exception as e:
+    #     print '****ERROR IN MAIN EXECUTION****'
+    #     print e
     end = time.time()
+
+
     print '*' * 15
     print '**** SCRIPT ENDED AT {} ****'.format(time.ctime(int(time.time())))
-    print '**** SCRIPT EXECUTION TIME - {} HRS ****'.format(round((end - start)/3600, 2))
+    print '**** SCRIPT EXECUTION TIME - {} hrs ****'.format(round((end - start)/3600, 2))
+    print '**** SCRIPT EXECUTION TIME - {} mins ****'.format(round((end - start)/60, 2))
+    print '**** SCRIPT PERFORMANCE - {} ITEMS/min ****'.format(round(count / ((end - start)/60), 2))
+    print '**** SCRIPT PERFORMANCE - {} PROFITABLE/min ****'.format(round(profit_count / ((end - start)/60), 2))
     print '**** {} PROFITABLE BOOKS IDENTIFIED ****'.format(profit_count)
+
 
     # closeout
     cur.close()
-    if profit_count > 0:  # send email if profitable items
-        send_mail_via_smtp(profitable_file)
-    else:
-        os.remove(profitable_file)
-
+    if count > 1000:
+        write_item_key(item_file)
