@@ -26,6 +26,7 @@ def write(text, fname, profit=False):
         if not profit:
             f.write('\n')
 
+
 def write_item_key(key_file):
     """
     writes item file to S3 bucket
@@ -69,54 +70,59 @@ def trade_eligible(item):
 
 
 def check_profit(items):
+    """
+    checks items that are trade eligible for a profit on trade in. Looks at purchase price less shipping
+    and compares this to the trade value to establish profit. If a profit is found, item is written to output
+    :param items: current list of api response item(s) (up to 10)
+    :return:
+    """
     global profit_count, count, tab_depth, max_depth
     for item in items:
         if item is None:
             continue
-        write('{}{} - {}'.format('\t' * (max_depth - tab_depth), count, item.ASIN), log_file)
         count += 1
-        if hasattr(item.ItemAttributes, 'TradeInValue'):
-            try:
-                trade_value = item.ItemAttributes.TradeInValue.Amount / 100.0
-            except:
-                trade_value = 0
+        write('{}{} - {}'.format('\t' * (max_depth - tab_depth), count, item.ASIN), log_file)
+        write('{},{}'.format(item.ASIN, 'True'), item_file)
 
-            if hasattr(item.OfferSummary, 'LowestUsedPrice'):
-                try:
-                    lowest_used_price = item.OfferSummary.LowestUsedPrice.Amount / 100.0
-                except:
-                    lowest_used_price = 999
-            else:
-                lowest_used_price = 999
+        trade_value, lowest_used_price, lowest_new_price, url = check_price_attributes(item)
 
-            if hasattr(item.OfferSummary, 'LowestNewPrice'):
-                try:
-                    lowest_new_price = item.OfferSummary.LowestNewPrice.Amount / 100.0
-                except:
-                    lowest_new_price = 999
-            else:
-                lowest_new_price = 999
-
-            if hasattr(item, 'DetailPageURL'):
-                try:
-                    url = item.DetailPageURL
-                except:
-                    url = ''
-            else:
-                url = ''
-
+        if trade_value:
             price = min(lowest_used_price, lowest_new_price)
-            profit = (trade_value - price) - 3.99
+            profit = (trade_value - price) - 3.99  # discount profit to include shipping
             roi = round(float(profit / price * 100), 2)
-            # print '{}\n\tPrice: {}\n\tProfit: {}\n\tROI: {}'.format(item.ASIN, price, profit, roi)
-            # write(fname=log_file, text='\tPrice: {}\n\tProfit: {}\n\tROI: {}'.format(price, profit, roi))
 
-            if profit > 5:
+            if profit >= profit_min and roi >= roi_min:
                 profit_count += 1
                 print '{} - Profit of {} found - {}'.format(count, profit, item.ASIN)
                 write('{0}, {1}, {2}, {3}, {4}\n'.format(item.ASIN, price, profit, roi, url), fname=profitable_file, profit=True)
         else:
             continue
+
+
+def check_price_attributes(item):
+    trade_value, lowest_used_price, lowest_new_price, url = (None for i in range(4))
+    if hasattr(item.ItemAttributes, 'TradeInValue'):
+            try:
+                trade_value = item.ItemAttributes.TradeInValue.Amount / 100.0
+            except:
+                trade_value = 0
+
+            try:
+                lowest_used_price = item.OfferSummary.LowestUsedPrice.Amount / 100.0
+            except:
+                lowest_used_price = 999
+
+            try:
+                lowest_new_price = item.OfferSummary.LowestNewPrice.Amount / 100.0
+            except:
+                lowest_new_price = 999
+
+            try:
+                url = item.offer_url
+            except:
+                url = ''
+
+    return trade_value, lowest_used_price, lowest_new_price, url
 
 
 def seendb(asin):
@@ -147,7 +153,7 @@ def main(asin_key, max_depth):
         try:
             check_profit(next_asin_set)
         except Exception as e:
-            print e
+            print 'Main Exception -', e
             continue
 
 
