@@ -39,8 +39,8 @@
       <file leaf-file-name="recursive_amzn_search_working.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/recursive_amzn_search_working.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.5521583">
-              <caret line="153" column="25" selection-start-line="153" selection-start-column="25" selection-end-line="153" selection-end-column="25" />
+            <state vertical-scroll-proportion="0.67086333">
+              <caret line="207" column="87" selection-start-line="207" selection-start-column="87" selection-end-line="207" selection-end-column="87" />
               <folding>
                 <element signature="e#0#10#0" expanded="true" />
               </folding>
@@ -51,8 +51,8 @@
       <file leaf-file-name="recursive_simple_amzn_search.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/recursive_simple_amzn_search.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-10.305555">
-              <caret line="134" column="60" selection-start-line="134" selection-start-column="60" selection-end-line="134" selection-end-column="60" />
+            <state vertical-scroll-proportion="-23.222221">
+              <caret line="239" column="13" selection-start-line="239" selection-start-column="13" selection-end-line="239" selection-end-column="13" />
               <folding>
                 <element signature="e#0#11#0" expanded="true" />
               </folding>
@@ -452,12 +452,6 @@
       <option name="number" value="Default" />
       <updated>1445444780902</updated>
     </task>
-    <task id="LOCAL-00069" summary="init">
-      <created>1446576840293</created>
-      <option name="number" value="00069" />
-      <option name="project" value="LOCAL" />
-      <updated>1446576840294</updated>
-    </task>
     <task id="LOCAL-00070" summary="init">
       <created>1446577014758</created>
       <option name="number" value="00070" />
@@ -746,7 +740,13 @@
       <option name="project" value="LOCAL" />
       <updated>1453324333390</updated>
     </task>
-    <option name="localTasksCounter" value="118" />
+    <task id="LOCAL-00118" summary="init">
+      <created>1453325342502</created>
+      <option name="number" value="00118" />
+      <option name="project" value="LOCAL" />
+      <updated>1453325342502</updated>
+    </task>
+    <option name="localTasksCounter" value="119" />
     <servers />
   </component>
   <component name="TodoView" selected-index="4">
@@ -870,7 +870,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="python-line">
           <url>file://$PROJECT_DIR$/recursive_amzn_search_working.py</url>
-          <line>80</line>
+          <line>85</line>
           <option name="timeStamp" value="256" />
         </line-breakpoint>
       </breakpoints>
@@ -1310,8 +1310,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/recursive_simple_amzn_search.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-10.305555">
-          <caret line="134" column="60" selection-start-line="134" selection-start-column="60" selection-end-line="134" selection-end-column="60" />
+        <state vertical-scroll-proportion="-23.222221">
+          <caret line="239" column="13" selection-start-line="239" selection-start-column="13" selection-end-line="239" selection-end-column="13" />
           <folding>
             <element signature="e#0#11#0" expanded="true" />
           </folding>
@@ -1320,8 +1320,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/recursive_amzn_search_working.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.5521583">
-          <caret line="153" column="25" selection-start-line="153" selection-start-column="25" selection-end-line="153" selection-end-column="25" />
+        <state vertical-scroll-proportion="0.67086333">
+          <caret line="207" column="87" selection-start-line="207" selection-start-column="87" selection-end-line="207" selection-end-column="87" />
           <folding>
             <element signature="e#0#10#0" expanded="true" />
           </folding>

@@ -14,6 +14,11 @@ from amazonproduct.api import API
 
 
 def get_latest_key(keys):
+    """
+    gets the latest key from s3 bucket "textbook arbitrage"
+    :param keys:
+    :return:
+    """
     regex = re.compile(r'scraping_items\/items-(.+)\.csv')
     keys = [(key, datetime.strptime(regex.search(key.name).group(1), '%m-%d-%Y')) for key in keys if regex.match(key.name)]
     latest_key = max(keys, key=itemgetter(1))[0]
