@@ -39,8 +39,8 @@
       <file leaf-file-name="recursive_amzn_search_working.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/recursive_amzn_search_working.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-1.4136691">
-              <caret line="143" column="0" selection-start-line="143" selection-start-column="0" selection-end-line="143" selection-end-column="0" />
+            <state vertical-scroll-proportion="0.8021583">
+              <caret line="195" column="26" selection-start-line="195" selection-start-column="26" selection-end-line="195" selection-end-column="26" />
               <folding>
                 <element signature="e#0#10#0" expanded="true" />
               </folding>
@@ -52,8 +52,10 @@
         <entry file="file://$PROJECT_DIR$/del.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="6" column="0" selection-start-line="6" selection-start-column="0" selection-end-line="18" selection-end-column="20" />
-              <folding />
+              <caret line="6" column="0" selection-start-line="6" selection-start-column="0" selection-end-line="20" selection-end-column="20" />
+              <folding>
+                <marker date="1453415177751" expanded="true" signature="83:466" placeholder="..." />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -240,7 +242,7 @@
       <recent name="C:\Users\kbonnet\PycharmProjects\AWS\Projects\amazon-api\archive" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.del (1)">
+  <component name="RunManager" selected="Python.recursive_amzn_search_working">
     <configuration default="false" name="recursive_amzn_search" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -457,8 +459,8 @@
     </list>
     <recent_temporary>
       <list size="5">
-        <item index="0" class="java.lang.String" itemvalue="Python.del (1)" />
-        <item index="1" class="java.lang.String" itemvalue="Python.recursive_amzn_search_working" />
+        <item index="0" class="java.lang.String" itemvalue="Python.recursive_amzn_search_working" />
+        <item index="1" class="java.lang.String" itemvalue="Python.del (1)" />
         <item index="2" class="java.lang.String" itemvalue="Python.project_backup" />
         <item index="3" class="java.lang.String" itemvalue="Python.recursive_simple_amzn_search" />
         <item index="4" class="java.lang.String" itemvalue="Python.recursive_amzn_search" />
@@ -475,18 +477,6 @@
       <created>1445444780902</created>
       <option name="number" value="Default" />
       <updated>1445444780902</updated>
-    </task>
-    <task id="LOCAL-00073" summary="init">
-      <created>1447174055122</created>
-      <option name="number" value="00073" />
-      <option name="project" value="LOCAL" />
-      <updated>1447174055122</updated>
-    </task>
-    <task id="LOCAL-00074" summary="init">
-      <created>1449505365845</created>
-      <option name="number" value="00074" />
-      <option name="project" value="LOCAL" />
-      <updated>1449505365845</updated>
     </task>
     <task id="LOCAL-00075" summary="init">
       <created>1451321134123</created>
@@ -770,7 +760,19 @@
       <option name="project" value="LOCAL" />
       <updated>1453403627922</updated>
     </task>
-    <option name="localTasksCounter" value="122" />
+    <task id="LOCAL-00122" summary="init">
+      <created>1453415042187</created>
+      <option name="number" value="00122" />
+      <option name="project" value="LOCAL" />
+      <updated>1453415042188</updated>
+    </task>
+    <task id="LOCAL-00123" summary="init">
+      <created>1453415180914</created>
+      <option name="number" value="00123" />
+      <option name="project" value="LOCAL" />
+      <updated>1453415180914</updated>
+    </task>
+    <option name="localTasksCounter" value="124" />
     <servers />
   </component>
   <component name="TodoView" selected-index="4">
@@ -792,7 +794,7 @@
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32912844" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32906976" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.3151163" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.3151163" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
@@ -899,7 +901,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="python-line">
           <url>file://$PROJECT_DIR$/del.py</url>
-          <line>15</line>
+          <line>17</line>
           <option name="timeStamp" value="258" />
         </line-breakpoint>
       </breakpoints>
@@ -1338,15 +1340,17 @@
     <entry file="file://$PROJECT_DIR$/del.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="6" column="0" selection-start-line="6" selection-start-column="0" selection-end-line="18" selection-end-column="20" />
-          <folding />
+          <caret line="6" column="0" selection-start-line="6" selection-start-column="0" selection-end-line="20" selection-end-column="20" />
+          <folding>
+            <marker date="1453415177751" expanded="true" signature="83:466" placeholder="..." />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/recursive_amzn_search_working.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-1.4136691">
-          <caret line="143" column="0" selection-start-line="143" selection-start-column="0" selection-end-line="143" selection-end-column="0" />
+        <state vertical-scroll-proportion="0.8021583">
+          <caret line="195" column="26" selection-start-line="195" selection-start-column="26" selection-end-line="195" selection-end-column="26" />
           <folding>
             <element signature="e#0#10#0" expanded="true" />
           </folding>

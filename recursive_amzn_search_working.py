@@ -184,13 +184,13 @@ def main(asin_key, max_depth):
         write('{},{}'.format(asin, 'True'), item_file)
         next_asin_set = recursive_amzn(asin, depth=max_depth)
 
-        # try:
-        if not check_runtime(time.time()):
-            check_profit(next_asin_set)
-        # except Exception as e:
-        #     print 'main exception', e
-        #     write('ERROR main - {}'.format(e), log_file)
-        #     continue
+        try:
+            if not check_runtime(time.time()):
+                check_profit(next_asin_set)
+        except Exception as e:
+            print 'main exception', e
+            write('ERROR main - {}'.format(e), log_file)
+            continue
 
 
 if __name__ == '__main__':
@@ -263,11 +263,11 @@ if __name__ == '__main__':
     #     print e
     end = time.time()
 
-
     print '*' * 15
     print '**** SCRIPT ENDED AT {} ****'.format(time.ctime(int(time.time())))
     print '**** SCRIPT EXECUTION TIME - {} hrs ****'.format(round((end - start)/3600, 2))
     print '**** SCRIPT EXECUTION TIME - {} mins ****'.format(round((end - start)/60, 2))
+    print '**** SCRIPT PERFORMANCE - {} ITEMS SCANNED ****'.format(count)
     print '**** SCRIPT PERFORMANCE - {} ITEMS/min ****'.format(round(count / ((end - start)/60), 2))
     print '**** SCRIPT PERFORMANCE - {} PROFITABLE/min ****'.format(round(profit_count / ((end - start)/60), 2))
     print '**** {} PROFITABLE BOOKS IDENTIFIED ****'.format(profit_count)
@@ -277,3 +277,5 @@ if __name__ == '__main__':
     cur.close()
     if count > 1000:
         write_item_key(item_file)
+        print '**** KEY UPLOADED ****'
+
