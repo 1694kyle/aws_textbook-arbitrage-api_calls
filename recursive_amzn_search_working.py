@@ -40,7 +40,9 @@ def write_item_key(key_file):
     :return:
     """
     path = r'scraping_items/'
-    full_key_name = os.path.join(path, os.path.basename(key_file))
+    date = datetime.today().date().strftime('%m-%d-%Y')
+    key_name = 'items-{}.csv'.format(date)
+    full_key_name = os.path.join(path, key_name)
     k = bucket.new_key(full_key_name)
     k.set_contents_from_filename(key_file)
 
@@ -216,7 +218,7 @@ if __name__ == '__main__':
     # amazon = AmazonAPI(AWS_ACCESS_KEY, AWS_SECRET_KEY, 'boutiqueguita-20')
 
     # misc variables
-    runtime = '5 minutes'
+    runtime = '1 day'
     profit_min = 10
     roi_min = 15
     count = 0
@@ -266,7 +268,7 @@ if __name__ == '__main__':
     #     print e
     end = time.time()
 
-    print '*' * 15
+    print '*' * 35
     print '**** SCRIPT ENDED AT {} ****'.format(time.ctime(int(time.time())))
     print '**** SCRIPT EXECUTION TIME - {} hrs ****'.format(round((end - start)/3600, 2))
     print '**** SCRIPT EXECUTION TIME - {} mins ****'.format(round((end - start)/60, 2))
