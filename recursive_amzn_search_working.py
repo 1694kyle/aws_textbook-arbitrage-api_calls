@@ -143,6 +143,20 @@ def seendb(asin):
     return False
 
 
+def check_runtime(elapsed):
+    amount, metric = runtime.split()
+    if 'day' in metric.lower():
+        limit = float(amount) * (24 * 3600)
+    elif 'hour' in metric.lower():
+        limit = float(amount) * (24 * 60)
+    else:
+        limit = float(amount)
+
+    if (elapsed - start) > limit:
+        return True
+    else:
+        return False
+
 def main(asin_key, max_depth):
     """
     main execution. takes latest S3 asin key and begins the recursive search.
@@ -168,7 +182,8 @@ def main(asin_key, max_depth):
         next_asin_set = recursive_amzn(asin, depth=max_depth)
 
         # try:
-        check_profit(next_asin_set)
+        if not check_runtime(time.time()):
+            check_profit(next_asin_set)
         # except Exception as e:
         #     print 'main exception', e
         #     write('ERROR main - {}'.format(e), log_file)
@@ -195,6 +210,7 @@ if __name__ == '__main__':
     # amazon = AmazonAPI(AWS_ACCESS_KEY, AWS_SECRET_KEY, 'boutiqueguita-20')
 
     # misc variables
+    runtime = '1 day'
     profit_min = 10
     roi_min = 15
     count = 0
