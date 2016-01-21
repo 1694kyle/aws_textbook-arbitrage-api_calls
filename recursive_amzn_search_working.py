@@ -8,7 +8,8 @@ import time
 import urllib2
 from datetime import datetime
 from operator import itemgetter
-
+import pandas as pd
+import numpy as np
 import boto
 from amazonproduct.api import API
 
@@ -143,23 +144,35 @@ def seendb(asin):
 
 
 def main(asin_key, max_depth):
-    global count, items
+    """
+    main execution. takes latest S3 asin key and begins the recursive search.
+    :param asin_key: latest asin key in S3 bucket
+    :param max_depth: max recursion depth to be performed
+    :return:
+    """
+    global count
     # create download url for key file
-    response = urllib2.urlopen(asin_key.generate_url(120))
-    asin_csv = csv.reader(response)
-    asin_csv.next()  # skip header row
-    asin_csv = sorted(asin_csv, key=operator.itemgetter(1), reverse=True)  # sort on trade eligible books
-    for row in asin_csv:
+    response = urllib2.urlopen(asin_key.generate_url(120))  # download url expires in 120 sec
+
+    asin_frame = pd.read_csv(response)
+
+    # randomize frame and sort by trade_eligible = True
+    asin_frame = asin_frame.reindex(np.random.permutation(asin_frame.index)).sort('trade_eligible', ascending=False).reset_index(drop=True)
+    asin_frame.index += 1
+    for row in asin_frame[1:].iterrows():
+        row = row[1]
         count += 1
-        asin = row[0]
+        asin = row.isbn10
         write('{} - {}'.format(count, asin), log_file)
+        write('{},{}'.format(asin, 'True'), item_file)
         next_asin_set = recursive_amzn(asin, depth=max_depth)
 
-        try:
-            check_profit(next_asin_set)
-        except Exception as e:
-            print 'Main Exception -', e
-            continue
+        # try:
+        check_profit(next_asin_set)
+        # except Exception as e:
+        #     print 'main exception', e
+        #     write('ERROR main - {}'.format(e), log_file)
+        #     continue
 
 
 if __name__ == '__main__':
