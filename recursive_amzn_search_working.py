@@ -187,6 +187,8 @@ def main(asin_key, max_depth):
         try:
             if not check_runtime(time.time()):
                 check_profit(next_asin_set)
+            else:
+                write('LIMIT REACHED. SHUTTING DOWN', log_file)
         except Exception as e:
             print 'main exception', e
             write('ERROR main - {}'.format(e), log_file)
@@ -213,7 +215,7 @@ if __name__ == '__main__':
     # amazon = AmazonAPI(AWS_ACCESS_KEY, AWS_SECRET_KEY, 'boutiqueguita-20')
 
     # misc variables
-    runtime = '5 minutes'
+    runtime = '1 minutes'
     profit_min = 10
     roi_min = 15
     count = 0
@@ -256,6 +258,7 @@ if __name__ == '__main__':
     # execution
     start = time.time()
     print '**** SCRIPT STARTED AT {} ****'.format(time.ctime(int(time.time())))
+    print '**** RUN LIMIT OF {} ****'.format(runtime)
     # try:
     main(latest_items_key, max_depth)
     # except Exception as e:
