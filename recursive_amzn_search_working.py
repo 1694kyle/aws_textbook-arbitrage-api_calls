@@ -148,7 +148,9 @@ def check_runtime(elapsed):
     if 'day' in metric.lower():
         limit = float(amount) * (24 * 3600)
     elif 'hour' in metric.lower():
-        limit = float(amount) * (24 * 60)
+        limit = float(amount) * 3600
+    elif 'minute' in metric.lower():
+        limit = float(amount) * 60
     else:
         limit = float(amount)
 
@@ -156,6 +158,7 @@ def check_runtime(elapsed):
         return True
     else:
         return False
+
 
 def main(asin_key, max_depth):
     """
@@ -210,7 +213,7 @@ if __name__ == '__main__':
     # amazon = AmazonAPI(AWS_ACCESS_KEY, AWS_SECRET_KEY, 'boutiqueguita-20')
 
     # misc variables
-    runtime = '1 day'
+    runtime = '5 minutes'
     profit_min = 10
     roi_min = 15
     count = 0
