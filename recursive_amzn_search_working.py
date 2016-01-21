@@ -189,6 +189,7 @@ def main(asin_key, max_depth):
                 check_profit(next_asin_set)
             else:
                 write('LIMIT REACHED. SHUTTING DOWN', log_file)
+                break
         except Exception as e:
             print 'main exception', e
             write('ERROR main - {}'.format(e), log_file)
@@ -215,12 +216,11 @@ if __name__ == '__main__':
     # amazon = AmazonAPI(AWS_ACCESS_KEY, AWS_SECRET_KEY, 'boutiqueguita-20')
 
     # misc variables
-    runtime = '1 minutes'
+    runtime = '5 minutes'
     profit_min = 10
     roi_min = 15
     count = 0
     profit_count = 0
-    items = []
     max_depth = 3  # set depth to check similar items
     tab_depth = 1
 
