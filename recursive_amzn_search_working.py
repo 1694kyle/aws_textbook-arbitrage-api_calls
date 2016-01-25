@@ -218,7 +218,7 @@ if __name__ == '__main__':
     # amazon = AmazonAPI(AWS_ACCESS_KEY, AWS_SECRET_KEY, 'boutiqueguita-20')
 
     # misc variables
-    runtime = '1 day'
+    runtime = '2 days'
     profit_min = 10
     roi_min = 15
     count = 0
