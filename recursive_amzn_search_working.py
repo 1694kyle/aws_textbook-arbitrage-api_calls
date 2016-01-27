@@ -53,7 +53,7 @@ def recursive_amzn(asin, depth=3):
     tab_depth = depth
     if depth > 0:
         try:
-            response = api.similarity_lookup(asin, ResponseGroup='Large')
+            response = api.similarity_lookup(asin, ResponseGroup='Large', search_index = 'Books')
         except:
             try:
                 response = api.item_lookup(asin, ResponseGroup='Large')
