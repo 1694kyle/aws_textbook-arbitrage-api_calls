@@ -71,6 +71,11 @@ def recursive_amzn(asin, depth=3):
 
 
 def trade_eligible(item):
+    try:
+        write_browsenodes(item.BrowseNodes, 0)
+    except:
+        pass
+
     if hasattr(item.ItemAttributes, 'IsEligibleForTradeIn'):
         return True
     else:
@@ -143,6 +148,17 @@ def seendb(asin):
     sql.commit()
 
     return False
+
+
+def write_browsenodes(item, tab_level):
+    nodes = {}
+    for i in range(1000):
+        nodes[i] = '{} - {}'.format(item.BrowseNode.Id, item.BrowseNode.Name)
+
+    for i in range(len(nodes)):
+        write('{}{}'.format('\t' * tab_level, nodes[i]), browse_node_file)
+        tab_level += 1
+        write_browsenodes(item.BrowseNode.Ancestors, tab_level)
 
 
 def check_runtime(elapsed):
@@ -232,11 +248,13 @@ if __name__ == '__main__':
     log_file = os.path.join(LOCAL_OUTPUT_DIR, 'Logs', 'log - {}.csv'.format(date))
     profitable_file = os.path.join(LOCAL_OUTPUT_DIR, 'Profitable', 'profitable - {}.csv'.format(date))
     item_file = os.path.join(LOCAL_OUTPUT_DIR, 'Items', 'items-{}.csv'.format(date))
+    browse_node_file = os.path.join(LOCAL_OUTPUT_DIR, 'Browse Nodes', 'browse nodes-{}.csv'.format(date))
 
     # crete out dirs if not there
     if not os.path.isdir(os.path.join(LOCAL_OUTPUT_DIR, 'Items')): os.makedirs(os.path.join(LOCAL_OUTPUT_DIR, 'Items'))
     if not os.path.isdir(os.path.join(LOCAL_OUTPUT_DIR, 'Logs')): os.makedirs(os.path.join(LOCAL_OUTPUT_DIR, 'Logs'))
     if not os.path.isdir(os.path.join(LOCAL_OUTPUT_DIR, 'Profitable')): os.makedirs(os.path.join(LOCAL_OUTPUT_DIR, 'Profitable'))
+    if not os.path.isdir(os.path.join(LOCAL_OUTPUT_DIR, 'Browse Nodes')): os.makedirs(os.path.join(LOCAL_OUTPUT_DIR, 'Browse Nodes'))
 
     # create or overwrite out files
     open(log_file, 'wb').close()
