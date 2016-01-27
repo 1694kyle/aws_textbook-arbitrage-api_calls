@@ -71,8 +71,14 @@ def recursive_amzn(asin, depth=3):
 
 
 def trade_eligible(item):
+    write('{}'.format(item.ASIN), browse_node_file)
     try:
-        write_browsenodes(item.BrowseNodes, 0)
+        get_browsenodes(item.BrowseNodes, 0)
+    except:
+        pass
+
+    try:
+        write_browsenodes()
     except:
         pass
 
@@ -150,15 +156,19 @@ def seendb(asin):
     return False
 
 
-def write_browsenodes(item, tab_level):
-    nodes = {}
-    for i in range(1000):
-        nodes[i] = '{} - {}'.format(item.BrowseNode.Id, item.BrowseNode.Name)
-
-    for i in range(len(nodes)):
-        write('{}{}'.format('\t' * tab_level, nodes[i]), browse_node_file)
+def get_browsenodes(item, tab_level):
+    global nodes
+    if tab_level == 0:
+        nodes = {}
+    while True:
+        nodes[tab_level] = '{} - {}'.format(item.BrowseNode.BrowseNodeId, item.BrowseNode.Name)
         tab_level += 1
-        write_browsenodes(item.BrowseNode.Ancestors, tab_level)
+        get_browsenodes(item.BrowseNode.Ancestors, tab_level)
+
+
+def write_browsenodes():
+    for i in range(1, len(nodes) +1):
+        write('{}{}'.format('\t' * i, nodes[len(nodes) - i]), browse_node_file)
 
 
 def check_runtime(elapsed):
@@ -234,6 +244,7 @@ if __name__ == '__main__':
     # amazon = AmazonAPI(AWS_ACCESS_KEY, AWS_SECRET_KEY, 'boutiqueguita-20')
 
     # misc variables
+    nodes = {}
     runtime = '2 days'
     profit_min = 10
     roi_min = 15
@@ -258,6 +269,7 @@ if __name__ == '__main__':
 
     # create or overwrite out files
     open(log_file, 'wb').close()
+    open(browse_node_file, 'wb').close()
     with open(profitable_file, 'wb') as f:
         f.write('{}, {}, {}, {}, {}\n'.format('asin', 'price', 'profit', 'roi', 'url'))
     with open(item_file, 'wb') as f:
