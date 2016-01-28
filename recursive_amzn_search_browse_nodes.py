@@ -63,6 +63,8 @@ def recursive_amzn(asin, depth=3):
         if response is not None:
             found = [item for item in response.Items.Item if not seendb(item.ASIN.text)]
             trade_eligible_found = [item for item in found if trade_eligible(item)]
+            if len(trade_eligible_found) == 0:
+                yield None
             for item in trade_eligible_found:
                 yield item
                 for nitem in recursive_amzn(item.ASIN.text, depth):
@@ -71,7 +73,21 @@ def recursive_amzn(asin, depth=3):
             yield None
 
 
+def record_nodes(item):
+    write('ASIN: {}'.format(item.ASIN), browse_node_file)
+    try:
+        get_browsenodes(item.BrowseNodes, 0)
+    except:
+        pass
+
+    try:
+        write_browsenodes()
+    except:
+        pass
+
+
 def trade_eligible(item):
+    record_nodes(item)
     if hasattr(item.ItemAttributes, 'IsEligibleForTradeIn'):
         return True
     else:
@@ -186,11 +202,17 @@ def main(asin_key, max_depth):
     :return:
     """
     global count
+    # get book browsenode
     parent_response = api.browse_node_lookup(1000)
+    # traversing child browsenodes
     for child in parent_response.BrowseNodes.BrowseNode.Children.BrowseNode:
+        write('**Current Node: {}**'.format(child.Name), browse_node_file)
         page_count = 0
-        child_response = api.browse_node_lookup(child.BrowseNodeId, 'TopSellers')
-        for item in child_response.BrowseNodes.BrowseNode.TopSellers.TopSeller:
+        # Item search with browsenode name as keyword
+        child_response = api.item_search('Books', Keywords=child.Name, ResponseGroup='Large')
+        for item in child_response:
+            write('ASIN: {}\n\t{}'.format(item.ASIN, child.Name), browse_node_file)
+            count += 1
             if page_count > max_node_page_depth:
                 break
             write('{} - {}'.format(count, item.ASIN.text), log_file)
@@ -230,7 +252,7 @@ if __name__ == '__main__':
 
     # misc variables
     nodes = {}
-    runtime = '2 days'
+    runtime = '8 Hours'
     profit_min = 10
     roi_min = 15
     count = 0
@@ -242,7 +264,7 @@ if __name__ == '__main__':
     # set up output location
     LOCAL_OUTPUT_DIR = os.path.join(os.environ.get('HOME'), 'Desktop', 'Recursive Search Results')
     # LOCAL_OUTPUT_DIR = os.path.join(os.environ.get('ONEDRIVE_PATH'), 'Recursive Search Results')
-    log_file = os.path.join(LOCAL_OUTPUT_DIR, 'Logs', 'log')
+    log_file = os.path.join(LOCAL_OUTPUT_DIR, 'Logs', 'log.csv')
     profitable_file = os.path.join(LOCAL_OUTPUT_DIR, 'Profitable', 'profitable - {}.csv'.format(date))
     item_file = os.path.join(LOCAL_OUTPUT_DIR, 'Items', 'items.csv')
     browse_node_file = os.path.join(LOCAL_OUTPUT_DIR, 'Browse Nodes', 'browse nodes.csv')
