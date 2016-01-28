@@ -72,17 +72,6 @@ def recursive_amzn(asin, depth=3):
 
 
 def trade_eligible(item):
-    write('ASIN: {}'.format(item.ASIN), browse_node_file)
-    try:
-        get_browsenodes(item.BrowseNodes, 0)
-    except:
-        pass
-
-    try:
-        write_browsenodes()
-    except:
-        pass
-
     if hasattr(item.ItemAttributes, 'IsEligibleForTradeIn'):
         return True
     else:
@@ -205,9 +194,7 @@ def main(asin_key, max_depth):
             if page_count > max_node_page_depth:
                 break
             write('{} - {}'.format(count, item.ASIN.text), log_file)
-            write('{},{}'.format(item.ASIN.text, 'True'), item_file)
             next_asin_set = recursive_amzn(item.ASIN.text, depth=max_depth)
-
             try:
                 if not check_runtime(time.time()):
                     check_profit(next_asin_set)
