@@ -1,21 +1,17 @@
+import os
+import re
+import time
+from datetime import datetime
+from operator import itemgetter
+
+import boto
+import numpy as np
+import pandas as pd
 from amazonproduct.api import API
 from amazonproduct.errors import AWSError
-import boto
 from boto.s3.key import Key
-from datetime import datetime
-import re
-import pandas as pd
-import numpy as np
-import time
-import os
-from email.mime.application import MIMEApplication
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-import smtplib
-from operator import itemgetter
-import time
 
-from result_email import send_mail_via_smtp
+from archive.result_email import send_mail_via_smtp
 
 
 def item_keys(keys):

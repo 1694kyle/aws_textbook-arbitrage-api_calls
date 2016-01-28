@@ -59,6 +59,7 @@ def recursive_amzn(asin, depth=3):
                 response = api.item_lookup(asin, ResponseGroup='Large')
             except:
                 response = None
+
         if response is not None:
             found = [item for item in response.Items.Item if not seendb(item.ASIN.text)]
             trade_eligible_found = [item for item in found if trade_eligible(item)]
@@ -196,32 +197,29 @@ def main(asin_key, max_depth):
     :return:
     """
     global count
-    # create download url for key file
-    response = urllib2.urlopen(asin_key.generate_url(120))  # download url expires in 120 sec
-
-    asin_frame = pd.read_csv(response)
-
-    # randomize frame and sort by trade_eligible = True
-    asin_frame = asin_frame.reindex(np.random.permutation(asin_frame.index)).sort('trade_eligible', ascending=False).reset_index(drop=True)
-    asin_frame.index += 1
-    for row in asin_frame[1:].iterrows():
-        row = row[1]
-        count += 1
-        asin = row.isbn10
-        write('{} - {}'.format(count, asin), log_file)
-        write('{},{}'.format(asin, 'True'), item_file)
-        next_asin_set = recursive_amzn(asin, depth=max_depth)
-
-        try:
-            if not check_runtime(time.time()):
-                check_profit(next_asin_set)
-            else:
-                write('LIMIT REACHED. SHUTTING DOWN', log_file)
+    parent_response = api.browse_node_lookup(1000)
+    for child in parent_response.BrowseNodes.BrowseNode.Children.BrowseNode:
+        page_count = 0
+        child_response = api.browse_node_lookup(child.BrowseNodeId, 'TopSellers')
+        for item in child_response.BrowseNodes.BrowseNode.TopSellers.TopSeller:
+            if page_count > max_node_page_depth:
                 break
-        except Exception as e:
-            print 'main exception', e
-            write('ERROR main - {}'.format(e), log_file)
-            continue
+            write('{} - {}'.format(count, item.ASIN.text), log_file)
+            write('{},{}'.format(item.ASIN.text, 'True'), item_file)
+            next_asin_set = recursive_amzn(item.ASIN.text, depth=max_depth)
+
+            try:
+                if not check_runtime(time.time()):
+                    check_profit(next_asin_set)
+                else:
+                    write('LIMIT REACHED. SHUTTING DOWN', log_file)
+                    break
+            except Exception as e:
+                print 'main exception', e
+                write('ERROR main - {}'.format(e), log_file)
+                continue
+
+            page_count += 1
 
 
 if __name__ == '__main__':
@@ -251,15 +249,16 @@ if __name__ == '__main__':
     count = 0
     profit_count = 0
     max_depth = 3  # set depth to check similar items
+    max_node_page_depth = 300
     tab_depth = 1
 
     # set up output location
     LOCAL_OUTPUT_DIR = os.path.join(os.environ.get('HOME'), 'Desktop', 'Recursive Search Results')
     # LOCAL_OUTPUT_DIR = os.path.join(os.environ.get('ONEDRIVE_PATH'), 'Recursive Search Results')
-    log_file = os.path.join(LOCAL_OUTPUT_DIR, 'Logs', 'log - {}.csv'.format(date))
+    log_file = os.path.join(LOCAL_OUTPUT_DIR, 'Logs', 'log')
     profitable_file = os.path.join(LOCAL_OUTPUT_DIR, 'Profitable', 'profitable - {}.csv'.format(date))
-    item_file = os.path.join(LOCAL_OUTPUT_DIR, 'Items', 'items-{}.csv'.format(date))
-    browse_node_file = os.path.join(LOCAL_OUTPUT_DIR, 'Browse Nodes', 'browse nodes-{}.csv'.format(date))
+    item_file = os.path.join(LOCAL_OUTPUT_DIR, 'Items', 'items.csv')
+    browse_node_file = os.path.join(LOCAL_OUTPUT_DIR, 'Browse Nodes', 'browse nodes.csv')
 
     # crete out dirs if not there
     if not os.path.isdir(os.path.join(LOCAL_OUTPUT_DIR, 'Items')): os.makedirs(os.path.join(LOCAL_OUTPUT_DIR, 'Items'))
