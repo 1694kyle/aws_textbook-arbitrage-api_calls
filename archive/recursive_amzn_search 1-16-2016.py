@@ -110,7 +110,7 @@ def trade_eligible(item):
 
 
 def check_profit(items):
-    global profit_count, count, tab_depth, max_depth
+    global profit_count, count, tab_depth, max_similar_depth
     for item in items:
         if item is None:
             continue
@@ -183,7 +183,7 @@ def main(asin_key, max_depth):
     # random_true_asin = sorted((i for i in items if i[1] == 'True'), key=lambda k: random.random())
     # false_asin = [i for i in items if i[1] != 'True']
     #
-    # asin_csv = (item for item in (random_true_asin + false_asin)[:int(200000 / max_depth)])  # create new gen to deliver randomized books up to 5200k/max_depth
+    # asin_csv = (item for item in (random_true_asin + false_asin)[:int(200000 / max_similar_depth)])  # create new gen to deliver randomized books up to 5200k/max_similar_depth
     # random_true_asin = []  # clean up
     # false_asin = []  # clean up
 
@@ -231,7 +231,7 @@ if __name__ == '__main__':
     profit_count = 0
     # date = datetime.today().date()
     items = []
-    max_depth = 3  # set depth to check similar items
+    max_similar_depth = 3  # set depth to check similar items
     tab_depth = 1
 
     # set up output location
@@ -269,7 +269,7 @@ if __name__ == '__main__':
     start = time.time()
     print '**** SCRIPT STARTED AT {} ****'.format(time.ctime(int(time.time())))
     try:
-        main(latest_items_key, max_depth)
+        main(latest_items_key, max_similar_depth)
     except Exception as e:
         print '****ERROR IN MAIN EXECUTION****'
         print e

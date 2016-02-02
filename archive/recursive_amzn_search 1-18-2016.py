@@ -110,7 +110,7 @@ def trade_eligible(item):
 
 
 def check_profit(items):
-    global profit_count, count, tab_depth, max_depth
+    global profit_count, count, tab_depth, max_similar_depth
     for item in items:
         if item is None:
             continue
@@ -219,7 +219,7 @@ if __name__ == '__main__':
     count = 0
     profit_count = 0
     items = []
-    max_depth = 3  # set depth to check similar items
+    max_similar_depth = 3  # set depth to check similar items
     tab_depth = 1
 
     # set up output location
@@ -257,7 +257,7 @@ if __name__ == '__main__':
     start = time.time()
     print '**** SCRIPT STARTED AT {} ****'.format(time.ctime(int(time.time())))
     try:
-        main(latest_items_key, max_depth)
+        main(latest_items_key, max_similar_depth)
     except Exception as e:
         print '****ERROR IN MAIN EXECUTION****'
         print e

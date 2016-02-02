@@ -95,12 +95,12 @@ def check_profit(items):
     :param items: current list of api response item(s) (up to 10)
     :return:
     """
-    global profit_count, count, tab_depth, max_depth
+    global profit_count, count, tab_depth, max_similar_depth
     for item in items:
         if item is None:
             continue
         count += 1
-        write('{}{} - {}'.format('\t' * (max_depth - tab_depth), count, item.ASIN), log_file)
+        write('{}{} - {}'.format('\t' * (max_similar_depth - tab_depth), count, item.ASIN), log_file)
         write('{},{}'.format(item.ASIN, 'True'), item_file)
 
         trade_value, lowest_used_price, lowest_new_price, url = check_price_attributes(item)
@@ -188,11 +188,11 @@ def check_runtime(elapsed):
         return False
 
 
-def main(asin_key, max_depth):
+def main(asin_key, max_similar_depth):
     """
     main execution. takes latest S3 asin key and begins the recursive search.
     :param asin_key: latest asin key in S3 bucket
-    :param max_depth: max recursion depth to be performed
+    :param max_similar_depth: max recursion depth to be performed
     :return:
     """
     global count
@@ -210,7 +210,7 @@ def main(asin_key, max_depth):
         asin = row.isbn10
         write('{} - {}'.format(count, asin), log_file)
         write('{},{}'.format(asin, 'True'), item_file)
-        next_asin_set = recursive_amzn(asin, depth=max_depth)
+        next_asin_set = recursive_amzn(asin, depth=max_similar_depth)
 
         try:
             if not check_runtime(time.time()):
@@ -225,6 +225,18 @@ def main(asin_key, max_depth):
 
 
 if __name__ == '__main__':
+
+    # misc variables
+    nodes = {}
+    write_items = False
+    runtime = '8 hours'
+    profit_min = 10
+    roi_min = 15
+    count = 0
+    profit_count = 0
+    max_similar_depth = 3  # set depth to check similar items
+    tab_depth = 1
+
     # boto connection
     AWS_ACCESS_KEY = os.environ.get('AWS_ACCESS_KEY')
     AWS_SECRET_KEY = os.environ.get('AWS_SECRET_KEY')
@@ -242,16 +254,6 @@ if __name__ == '__main__':
     # set up amazon-product-api
     api = API(locale='us')
     # amazon = AmazonAPI(AWS_ACCESS_KEY, AWS_SECRET_KEY, 'boutiqueguita-20')
-
-    # misc variables
-    nodes = {}
-    runtime = '2 days'
-    profit_min = 10
-    roi_min = 15
-    count = 0
-    profit_count = 0
-    max_depth = 3  # set depth to check similar items
-    tab_depth = 1
 
     # set up output location
     LOCAL_OUTPUT_DIR = os.path.join(os.environ.get('HOME'), 'Desktop', 'Recursive Search Results')
@@ -292,7 +294,7 @@ if __name__ == '__main__':
     print '**** SCRIPT STARTED AT {} ****'.format(time.ctime(int(time.time())))
     print '**** RUN LIMIT OF {} ****'.format(runtime)
     # try:
-    main(latest_items_key, max_depth)
+    main(latest_items_key, max_similar_depth)
     # except Exception as e:
     #     print '****ERROR IN MAIN EXECUTION****'
     #     print e
@@ -310,7 +312,7 @@ if __name__ == '__main__':
 
     # closeout
     cur.close()
-    if count > 1000:
+    if count > 1000 and write_items:
         write_item_key(item_file)
         print '**** KEY UPLOADED ****'
 

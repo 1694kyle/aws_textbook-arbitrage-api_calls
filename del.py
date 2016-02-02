@@ -1,16 +1,8 @@
-class Car(object):
-    def __init__(self):
-        self.has_engine = True
+l = ['my cat\n', 'your dog\n']
 
-    def set cruise()
+for x in l:
+    print x.find("\n")
 
+new_list = [x for x in l if x.find("\n") > -1]
 
-
-class Toyota(Car):
-    def __init__(self):
-        Car.__init__(self)
-
-
-my_car = Toyota()
-my_car.start()
-print my_car.has_engine
+print new_list

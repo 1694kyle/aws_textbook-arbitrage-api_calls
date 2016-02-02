@@ -101,12 +101,12 @@ def check_profit(items):
     :param items: current list of api response item(s) (up to 10)
     :return:
     """
-    global profit_count, count, tab_depth, max_depth
+    global profit_count, count, tab_depth, max_similar_depth
     for item in items:
         if item is None:
             continue
         count += 1
-        write('{}{} - {}'.format('\t' * (max_depth - tab_depth), count, item.ASIN), log_file)
+        write('{}{} - {}'.format('\t' * (max_similar_depth - tab_depth), count, item.ASIN), log_file)
         write('{},{}'.format(item.ASIN, 'True'), item_file)
 
         trade_value, lowest_used_price, lowest_new_price, url = check_price_attributes(item)
@@ -214,6 +214,7 @@ def main(asin_key, max_depth):
             write('ASIN: {}\n\t{}'.format(item.ASIN, child.Name), browse_node_file)
             count += 1
             if page_count > max_node_page_depth:
+                print 'page limit hit'
                 break
             write('{} - {}'.format(count, item.ASIN.text), log_file)
             next_asin_set = recursive_amzn(item.ASIN.text, depth=max_depth)
@@ -257,7 +258,7 @@ if __name__ == '__main__':
     roi_min = 15
     count = 0
     profit_count = 0
-    max_depth = 3  # set depth to check similar items
+    max_similar_depth = 5  # set depth to check similar items
     max_node_page_depth = 300
     tab_depth = 1
 
@@ -300,7 +301,7 @@ if __name__ == '__main__':
     print '**** SCRIPT STARTED AT {} ****'.format(time.ctime(int(time.time())))
     print '**** RUN LIMIT OF {} ****'.format(runtime)
     # try:
-    main(latest_items_key, max_depth)
+    main(latest_items_key, max_similar_depth)
     # except Exception as e:
     #     print '****ERROR IN MAIN EXECUTION****'
     #     print e
